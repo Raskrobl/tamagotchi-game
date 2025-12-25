@@ -123,8 +123,30 @@
       margin: 10px 0;
     }
     .checkbox-list label {
-      display: block;
-      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    .checkbox-list input[type="checkbox"] {
+      width: auto;
+      margin: 0 10px 0 0;
+      cursor: pointer;
+    }
+    .checkbox-list input[type="radio"] {
+      width: auto;
+      margin: 0 10px 0 0;
+      cursor: pointer;
+    }
+    .modal-content label {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    .modal-content input[type="radio"] {
+      width: auto;
+      margin: 0 10px 0 0;
       cursor: pointer;
     }
   </style>
@@ -183,7 +205,9 @@ const ADDON_PET_TYPES = [
   "Пчела",
   "бр бр бр бр патапим",
   "gramma",
-  "maddung"
+  "maddung",
+  "Didiblat(NEW)",  // Добавлено новое животное
+  "Корова(NEW)"     // Добавлено новое животное
 ];
 
 let pet = null;
@@ -359,8 +383,15 @@ function openSettings() {
   const content = `
     <h3>Настройки</h3>
     <p>Тема игры:</p>
-    <label><input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}> Тёмная</label><br>
-    <label><input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}> Светлая</label><br>
+    <label>
+      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>
+      Тёмная
+    </label>
+    <label>
+      <input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}>
+      Светлая
+    </label>
+    <br><br>
     <button onclick="saveSettings()">Сохранить</button>
   `;
   openModal(content);
@@ -389,6 +420,7 @@ function openAddons() {
   const content = `
     <h3>Дополнительные животные:</h3>
     <div class="checkbox-list">${checkboxes}</div>
+    <br>
     <button onclick="saveAddons()">Сохранить</button>
   `;
   openModal(content);
@@ -405,9 +437,19 @@ function openInterfaceSettings() {
   const current = interfaceStyle;
   const content = `
     <h3>Выберите вариант интерфейса:</h3>
-    <label><input type="radio" name="iface" value="new_year" ${current === 'new_year' ? 'checked' : ''}> Новогодний интерфейс (базовый)</label><br>
-    <label><input type="radio" name="iface" value="halloween" ${current === 'halloween' ? 'checked' : ''}> Хелуинский интерфейс</label><br>
-    <label><input type="radio" name="iface" value="holiday" ${current === 'holiday' ? 'checked' : ''}> Праздничный интерфейс</label><br>
+    <label>
+      <input type="radio" name="iface" value="new_year" ${current === 'new_year' ? 'checked' : ''}>
+      Новогодний интерфейс (базовый)
+    </label>
+    <label>
+      <input type="radio" name="iface" value="halloween" ${current === 'halloween' ? 'checked' : ''}>
+      Хелуинский интерфейс
+    </label>
+    <label>
+      <input type="radio" name="iface" value="holiday" ${current === 'holiday' ? 'checked' : ''}>
+      Праздничный интерфейс
+    </label>
+    <br><br>
     <button onclick="saveInterface()">Сохранить</button>
   `;
   openModal(content);
