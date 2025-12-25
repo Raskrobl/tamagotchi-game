@@ -149,6 +149,15 @@
       margin: 0 10px 0 0;
       cursor: pointer;
     }
+    .success-message {
+      background: #2e7d32;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -160,13 +169,14 @@
 </div>
 
 <div id="main-menu" class="screen active">
-  <h1 id="main-title">Новогодний тамаготчи</h1>
+  <h1 id="main-title">Новогодний тамагочи</h1>
   <p id="main-subtitle">Нажмите "Играть", чтобы создать своего питомца!</p>
   <button onclick="showCreateScreen()">Играть</button>
   <button onclick="openSettings()">Настройки</button>
   <button onclick="openAddons()">Дополнения</button>
   <button onclick="showCredits()">Создатели</button>
   <button onclick="openInterfaceSettings()">Интерфейс</button>
+  <button onclick="openSecretMenu()">Подарки</button>
 </div>
 
 <div id="create-screen" class="screen">
@@ -176,6 +186,7 @@
   <label>Тип питомца:</label>
   <select id="pet-type"></select>
   <button onclick="createPet()">Создать</button>
+  <button onclick="showScreen('main-menu')">Назад</button>
 </div>
 
 <div id="game-screen" class="screen">
@@ -189,6 +200,7 @@
     <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
     <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
   </div>
+  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); pet = null;">Назад</button>
   <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
 </div>
 
@@ -206,15 +218,16 @@ const ADDON_PET_TYPES = [
   "бр бр бр бр патапим",
   "gramma",
   "maddung",
-  "Didiblat(NEW)",  // Добавлено новое животное
-  "Корова(NEW)"     // Добавлено новое животное
+  "Didiblat(NEW)",
+  "Корова(NEW)"
 ];
-
+const SECRET_PET = "Панда (SECRET)";
 let pet = null;
 let enabledAddonTypes = new Set();
 let interfaceStyle = "new_year";
 let theme = "dark";
 let tickInterval = null;
+let secretUnlocked = false;
 
 class Pet {
   constructor(name, petType) {
@@ -266,19 +279,19 @@ class Pet {
 
 const INTERFACE_METADATA = {
   new_year: {
-    title: "Новогодний тамаготчи",
+    title: "Новогодний тамагочи",
     decor: { left: "❆", center: "Зимняя сказка", right: "❆" },
     statsBanner: "Тёплая забота согреет даже в самый снежный день",
     footer: "Кормите, играйте и укладывайте спать – и питомец будет счастлив"
   },
   halloween: {
-    title: "Хелуинский тамаготчи",
+    title: "Хелуинский тамагочи",
     decor: { left: "[ ]", center: "Ночь Хелуина", right: "[ ]" },
     statsBanner: "Следи за настроением своего таинственного питомца",
     footer: "Кормите, играйте и отдыхайте, чтобы прогнать тьму"
   },
   holiday: {
-    title: "Праздничный тамаготчи",
+    title: "Праздничный тамагочи",
     decor: { left: "* *", center: "Праздничное настроение", right: "* *" },
     statsBanner: "Пусть праздник продолжается – береги силы и радость питомца",
     footer: "Игры и угощения делают праздник ярче"
@@ -323,6 +336,9 @@ function refreshPetTypes() {
   ADDON_PET_TYPES.forEach(type => {
     if (enabledAddonTypes.has(type)) allTypes.push(type);
   });
+  if (secretUnlocked) {
+    allTypes.push(SECRET_PET);
+  }
   allTypes.forEach(type => {
     const option = document.createElement('option');
     option.value = type;
@@ -460,6 +476,32 @@ function saveInterface() {
   for (let radio of radios) if (radio.checked) interfaceStyle = radio.value;
   applyInterfaceMetadata();
   closeModal();
+}
+
+function openSecretMenu() {
+  const content = `
+    <h3>Подарки</h3>
+    <p>Введите секретный код, чтобы разблокировать особое животное:</p>
+    <input type="password" id="secret-code" placeholder="•••••" maxlength="5" />
+    <br><br>
+    <button onclick="submitSecretCode()">Применить</button>
+    <button onclick="closeModal()">Отмена</button>
+  `;
+  openModal(content);
+}
+
+function submitSecretCode() {
+  const code = document.getElementById('secret-code').value.trim();
+  if (code === "1x1x1") {
+    secretUnlocked = true;
+    // Показываем зелёное уведомление
+    const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;
+    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+    // Обновляем список животных (на случай, если пользователь уже в create-screen)
+    refreshPetTypes();
+    // Через 2 секунды можно автоматически закрыть, но оставим по выбору
+  }
+  // Если код неверный — ничего не делаем (тихо)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
