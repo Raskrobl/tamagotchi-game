@@ -200,8 +200,18 @@
     <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
     <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
   </div>
-  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); pet = null;">Назад</button>
+  <button onclick="showScreen('shop-screen')">Магазин</button>
+  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); pet = null; gold = 0;">Назад</button>
   <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
+</div>
+
+<div id="shop-screen" class="screen">
+  <h2>Магазин чудес</h2>
+  <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
+  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
+  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
+  <button onclick="buyPotion('strength')">Зелье силы — 40 🪙<br><small>+50 ко всем статам</small></button>
+  <button onclick="showScreen('game-screen')">Назад в игру</button>
 </div>
 
 <div id="modal" class="modal">
@@ -228,6 +238,10 @@ let interfaceStyle = "new_year";
 let theme = "dark";
 let tickInterval = null;
 let secretUnlocked = false;
+let gold = 0;
+let goldInterval = null;
+let satietyPotionActive = false;
+let satietyPotionTimer = null;
 
 class Pet {
   constructor(name, petType) {
@@ -270,9 +284,29 @@ class Pet {
 
   tick() {
     if (!this.alive) return;
-    this.hunger -= 3;
+    if (!satietyPotionActive) {
+      this.hunger -= 3;
+    }
     this.happiness -= 1;
     this.energy -= 1;
+    this._clampStats();
+  }
+
+  revive() {
+    if (!this.alive) {
+      this.alive = true;
+      this.hunger = 50;
+      this.happiness = 50;
+      this.energy = 50;
+      this._clampStats();
+    }
+  }
+
+  boostAll() {
+    this.hunger = Math.min(100, this.hunger + 50);
+    this.happiness = Math.min(100, this.happiness + 50);
+    this.energy = Math.min(100, this.energy + 50);
+    this.alive = true;
     this._clampStats();
   }
 }
@@ -301,6 +335,7 @@ const INTERFACE_METADATA = {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id === 'game-screen' || id === 'shop-screen') updateUI();
 }
 
 function closeModal() {
@@ -353,40 +388,95 @@ function updateUI() {
     document.getElementById('hunger').textContent = "Сытость: -";
     document.getElementById('happiness').textContent = "Счастье: -";
     document.getElementById('energy').textContent = "Энергия: -";
-    return;
+  } else {
+    const status = pet.alive ? "живой" : "мертв";
+    document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
+    document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
+    document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
+    document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
+
+    const buttonsEnabled = pet.alive;
+    document.getElementById('btn-feed').disabled = !buttonsEnabled;
+    document.getElementById('btn-play').disabled = !buttonsEnabled;
+    document.getElementById('btn-sleep').disabled = !buttonsEnabled;
   }
 
-  const status = pet.alive ? "живой" : "мертв";
-  document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
-  document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}`;
-  document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
-  document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
-
-  const buttonsEnabled = pet && pet.alive;
-  document.getElementById('btn-feed').disabled = !buttonsEnabled;
-  document.getElementById('btn-play').disabled = !buttonsEnabled;
-  document.getElementById('btn-sleep').disabled = !buttonsEnabled;
-
-  if (pet && !pet.alive) {
-    clearInterval(tickInterval);
-    alert(`У ${pet.name} закончилась сытость (0). Питомец умер.`);
-  }
+  // Обновляем монеты в магазине
+  document.getElementById('gold').textContent = gold;
 }
 
 function onFeed() { if (pet) { pet.feed(); updateUI(); } }
 function onPlay() { if (pet) { pet.play(); updateUI(); } }
 function onSleep() { if (pet) { pet.sleep(); updateUI(); } }
 
+function buyPotion(type) {
+  let cost = 0;
+  let success = false;
+
+  if (type === 'revive' && pet && !pet.alive) {
+    cost = 50;
+    if (gold >= cost) {
+      gold -= cost;
+      pet.revive();
+      success = true;
+    }
+  } else if (type === 'satiety' && pet && pet.alive) {
+    cost = 30;
+    if (gold >= cost) {
+      gold -= cost;
+      satietyPotionActive = true;
+      success = true;
+      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);
+      satietyPotionTimer = setTimeout(() => {
+        satietyPotionActive = false;
+        satietyPotionTimer = null;
+        updateUI();
+      }, 5 * 60 * 1000);
+    }
+  } else if (type === 'strength' && pet) {
+    cost = 40;
+    if (gold >= cost) {
+      gold -= cost;
+      pet.boostAll();
+      success = true;
+    }
+  }
+
+  if (success) {
+    updateUI();
+    const message = `<div class="success-message">✅ Куплено!</div>`;
+    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+    setTimeout(() => {
+      const msg = document.querySelector('.success-message');
+      if (msg) msg.remove();
+    }, 2000);
+  } else {
+    alert("Недостаточно монет или действие невозможно!");
+  }
+}
+
 function createPet() {
   const name = document.getElementById('pet-name').value.trim() || "Питомец";
   const type = document.getElementById('pet-type').value;
   pet = new Pet(name, type);
+  satietyPotionActive = false;
+  if (satietyPotionTimer) {
+    clearTimeout(satietyPotionTimer);
+    satietyPotionTimer = null;
+  }
   updateUI();
   showScreen('game-screen');
+
   clearInterval(tickInterval);
   tickInterval = setInterval(() => {
     if (pet) { pet.tick(); updateUI(); }
   }, 3000);
+
+  clearInterval(goldInterval);
+  goldInterval = setInterval(() => {
+    gold += 1;
+    updateUI(); // обновляем UI везде, где нужно
+  }, 5000);
 }
 
 function showCreateScreen() {
@@ -494,14 +584,10 @@ function submitSecretCode() {
   const code = document.getElementById('secret-code').value.trim();
   if (code === "1x1x1") {
     secretUnlocked = true;
-    // Показываем зелёное уведомление
     const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;
     document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
-    // Обновляем список животных (на случай, если пользователь уже в create-screen)
     refreshPetTypes();
-    // Через 2 секунды можно автоматически закрыть, но оставим по выбору
   }
-  // Если код неверный — ничего не делаем (тихо)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
