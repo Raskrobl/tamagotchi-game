@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Новогодний тамагочи</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: linear-gradient(to bottom, #04101f, #0d2438);
+      color: #f4fbff;
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .decor-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .screen {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(13, 36, 56, 0.7);
+      border-radius: 12px;
+      display: none;
+    }
+    .screen.active {
+      display: block;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #e63946;
+    }
+    h2 {
+      text-align: center;
+      margin: 10px 0 16px;
+      color: #56ccf2;
+    }
+    p {
+      text-align: center;
+      margin: 0 0 20px;
+      color: #a0c4e0;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: #56ccf2;
+      color: #0d2438;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 12px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #0b1b2b;
+      color: #f4fbff;
+      font-size: 16px;
+    }
+    .stats-banner {
+      text-align: center;
+      font-style: italic;
+      color: #a0e0ff;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .actions {
+      display: flex;
+      gap: 6px;
+      margin: 16px 0;
+    }
+    .actions button {
+      flex: 1;
+      font-size: 14px;
+      padding: 12px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #88b0d0;
+      margin-top: 6px;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #0d2438;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .checkbox-list {
+      text-align: left;
+      margin: 10px 0;
+    }
+    .checkbox-list label {
+      display: block;
+      margin: 4px 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="decor-bar">
+  <span class="decor-left">❆</span>
+  <span class="decor-center">Зимняя сказка</span>
+  <span class="decor-right">❆</span>
+</div>
+
+<div id="main-menu" class="screen active">
+  <h1 id="main-title">Новогодний тамаготчи</h1>
+  <p id="main-subtitle">Нажмите "Играть", чтобы создать своего питомца!</p>
+  <button onclick="showCreateScreen()">Играть</button>
+  <button onclick="openSettings()">Настройки</button>
+  <button onclick="openAddons()">Дополнения</button>
+  <button onclick="showCredits()">Создатели</button>
+  <button onclick="openInterfaceSettings()">Интерфейс</button>
+</div>
+
+<div id="create-screen" class="screen">
+  <h2>Создание питомца</h2>
+  <label>Имя питомца:</label>
+  <input type="text" id="pet-name" maxlength="20" placeholder="Питомец" />
+  <label>Тип питомца:</label>
+  <select id="pet-type"></select>
+  <button onclick="createPet()">Создать</button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div class="stats-banner">Тёплая забота согреет даже в самый снежный день</div>
+  <div id="pet-info">Питомец ещё не создан.</div>
+  <div id="hunger">Сытость: -</div>
+  <div id="happiness">Счастье: -</div>
+  <div id="energy">Энергия: -</div>
+  <div class="actions">
+    <button id="btn-feed" onclick="onFeed()" disabled>Кормить</button>
+    <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
+    <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
+  </div>
+  <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-content" id="modal-content"></div>
+</div>
+
+<script>
+const BASE_PET_TYPES = ["Собака", "Кошка", "Попугай"];
+const ADDON_PET_TYPES = [
+  "Арангутант",
+  "Черепаха",
+  "Одиндиндун",
+  "Пчела",
+  "бр бр бр бр патапим",
+  "gramma",
+  "maddung"
+];
+
+let pet = null;
+let enabledAddonTypes = new Set();
+let interfaceStyle = "new_year";
+let theme = "dark";
+let tickInterval = null;
+
+class Pet {
+  constructor(name, petType) {
+    this.name = name;
+    this.petType = petType;
+    this.hunger = 100;
+    this.happiness = 100;
+    this.energy = 100;
+    this.alive = true;
+  }
+
+  _clampStats() {
+    this.hunger = Math.max(0, Math.min(100, this.hunger));
+    this.happiness = Math.max(0, Math.min(100, this.happiness));
+    this.energy = Math.max(0, Math.min(100, this.energy));
+    if (this.hunger === 0) this.alive = false;
+  }
+
+  feed() {
+    if (!this.alive) return;
+    this.hunger += 20;
+    this.energy += 5;
+    this._clampStats();
+  }
+
+  play() {
+    if (!this.alive) return;
+    this.happiness += 15;
+    this.hunger -= 10;
+    this.energy -= 10;
+    this._clampStats();
+  }
+
+  sleep() {
+    if (!this.alive) return;
+    this.energy += 25;
+    this.hunger -= 5;
+    this._clampStats();
+  }
+
+  tick() {
+    if (!this.alive) return;
+    this.hunger -= 3;
+    this.happiness -= 1;
+    this.energy -= 1;
+    this._clampStats();
+  }
+}
+
+const INTERFACE_METADATA = {
+  new_year: {
+    title: "Новогодний тамаготчи",
+    decor: { left: "❆", center: "Зимняя сказка", right: "❆" },
+    statsBanner: "Тёплая забота согреет даже в самый снежный день",
+    footer: "Кормите, играйте и укладывайте спать – и питомец будет счастлив"
+  },
+  halloween: {
+    title: "Хелуинский тамаготчи",
+    decor: { left: "[ ]", center: "Ночь Хелуина", right: "[ ]" },
+    statsBanner: "Следи за настроением своего таинственного питомца",
+    footer: "Кормите, играйте и отдыхайте, чтобы прогнать тьму"
+  },
+  holiday: {
+    title: "Праздничный тамаготчи",
+    decor: { left: "* *", center: "Праздничное настроение", right: "* *" },
+    statsBanner: "Пусть праздник продолжается – береги силы и радость питомца",
+    footer: "Игры и угощения делают праздник ярче"
+  }
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+function openModal(content) {
+  document.getElementById('modal-content').innerHTML = content;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function applyInterfaceMetadata() {
+  const meta = INTERFACE_METADATA[interfaceStyle];
+  document.title = meta.title;
+  document.getElementById('main-title').textContent = meta.title;
+  document.querySelector('.decor-left').textContent = meta.decor.left;
+  document.querySelector('.decor-center').textContent = meta.decor.center;
+  document.querySelector('.decor-right').textContent = meta.decor.right;
+  document.querySelector('.stats-banner').textContent = meta.statsBanner;
+  document.querySelector('.footer').textContent = meta.footer;
+  const bgMap = {
+    new_year: 'linear-gradient(to bottom, #04101f, #0d2438)',
+    halloween: 'linear-gradient(to bottom, #120818, #241020)',
+    holiday: 'linear-gradient(to bottom, #021b21, #062b35)'
+  };
+  document.body.style.background = bgMap[interfaceStyle];
+}
+
+function refreshPetTypes() {
+  const select = document.getElementById('pet-type');
+  select.innerHTML = '';
+  const allTypes = [...BASE_PET_TYPES];
+  ADDON_PET_TYPES.forEach(type => {
+    if (enabledAddonTypes.has(type)) allTypes.push(type);
+  });
+  allTypes.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    select.appendChild(option);
+  });
+}
+
+function updateUI() {
+  if (!pet) {
+    document.getElementById('pet-info').textContent = "Питомец ещё не создан.";
+    document.getElementById('hunger').textContent = "Сытость: -";
+    document.getElementById('happiness').textContent = "Счастье: -";
+    document.getElementById('energy').textContent = "Энергия: -";
+    return;
+  }
+
+  const status = pet.alive ? "живой" : "мертв";
+  document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
+  document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}`;
+  document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
+  document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
+
+  const buttonsEnabled = pet && pet.alive;
+  document.getElementById('btn-feed').disabled = !buttonsEnabled;
+  document.getElementById('btn-play').disabled = !buttonsEnabled;
+  document.getElementById('btn-sleep').disabled = !buttonsEnabled;
+
+  if (pet && !pet.alive) {
+    clearInterval(tickInterval);
+    alert(`У ${pet.name} закончилась сытость (0). Питомец умер.`);
+  }
+}
+
+function onFeed() { if (pet) { pet.feed(); updateUI(); } }
+function onPlay() { if (pet) { pet.play(); updateUI(); } }
+function onSleep() { if (pet) { pet.sleep(); updateUI(); } }
+
+function createPet() {
+  const name = document.getElementById('pet-name').value.trim() || "Питомец";
+  const type = document.getElementById('pet-type').value;
+  pet = new Pet(name, type);
+  updateUI();
+  showScreen('game-screen');
+  clearInterval(tickInterval);
+  tickInterval = setInterval(() => {
+    if (pet) { pet.tick(); updateUI(); }
+  }, 3000);
+}
+
+function showCreateScreen() {
+  refreshPetTypes();
+  showScreen('create-screen');
+}
+
+function openSettings() {
+  const currentTheme = theme;
+  const content = `
+    <h3>Настройки</h3>
+    <p>Тема игры:</p>
+    <label><input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}> Тёмная</label><br>
+    <label><input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}> Светлая</label><br>
+    <button onclick="saveSettings()">Сохранить</button>
+  `;
+  openModal(content);
+}
+
+function saveSettings() {
+  const radios = document.getElementsByName('theme');
+  for (let radio of radios) if (radio.checked) theme = radio.value;
+  closeModal();
+}
+
+function showCredits() {
+  openModal(`
+    <h3>Создатели</h3>
+    <p>Raskrobl(Honexe) - с помощью нейросетей.</p>
+    <button onclick="closeModal()">Закрыть</button>
+  `);
+}
+
+function openAddons() {
+  let checkboxes = '';
+  ADDON_PET_TYPES.forEach(type => {
+    const checked = enabledAddonTypes.has(type) ? 'checked' : '';
+    checkboxes += `<label><input type="checkbox" value="${type}" ${checked}> ${type}</label>`;
+  });
+  const content = `
+    <h3>Дополнительные животные:</h3>
+    <div class="checkbox-list">${checkboxes}</div>
+    <button onclick="saveAddons()">Сохранить</button>
+  `;
+  openModal(content);
+}
+
+function saveAddons() {
+  enabledAddonTypes.clear();
+  document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
+    .forEach(cb => enabledAddonTypes.add(cb.value));
+  closeModal();
+}
+
+function openInterfaceSettings() {
+  const current = interfaceStyle;
+  const content = `
+    <h3>Выберите вариант интерфейса:</h3>
+    <label><input type="radio" name="iface" value="new_year" ${current === 'new_year' ? 'checked' : ''}> Новогодний интерфейс (базовый)</label><br>
+    <label><input type="radio" name="iface" value="halloween" ${current === 'halloween' ? 'checked' : ''}> Хелуинский интерфейс</label><br>
+    <label><input type="radio" name="iface" value="holiday" ${current === 'holiday' ? 'checked' : ''}> Праздничный интерфейс</label><br>
+    <button onclick="saveInterface()">Сохранить</button>
+  `;
+  openModal(content);
+}
+
+function saveInterface() {
+  const radios = document.getElementsByName('iface');
+  for (let radio of radios) if (radio.checked) interfaceStyle = radio.value;
+  applyInterfaceMetadata();
+  closeModal();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyInterfaceMetadata();
+  refreshPetTypes();
+});
+
+document.getElementById('modal').onclick = function(e) {
+  if (e.target === this) closeModal();
+};
+</script>
+
+</body>
+</html>
