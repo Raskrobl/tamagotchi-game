@@ -194,7 +194,211 @@
 <body>
 
 <div class="decor-bar">
-  Понял проблему! Длинный инлайн-код в кнопке "Назад" вызывает ошибки. Вот исправленный код:
+  <span class="decor-left">❆</span>  <span class="decor-center">Зимняя сказка</span>
+  <span class="decor-right">❆</span>
+</div>
+
+<div id="main-menu" class="screen active">
+  <h1 id="main-title">Новогодний тамагочи</h1>
+  <p id="main-subtitle">Нажмите "Играть", чтобы создать своего питомца!</p>
+  <button onclick="showCreateScreen()">Играть</button>
+  <button onclick="openSettings()">Настройки</button>
+  <button onclick="openAddons()">Дополнения</button>
+  <button onclick="showCredits()">Создатели</button>
+  <button onclick="openInterfaceSettings()">Интерфейс</button>
+  <button onclick="openSecretMenu()">Подарки</button>
+  <button onclick="showStats()">Статистика</button>
+</div>
+
+<div id="create-screen" class="screen">
+  <h2>Создание питомца</h2>
+  <label>Имя питомца:</label>
+  <input type="text" id="pet-name" maxlength="20" placeholder="Питомец" />
+  <label>Тип питомца:</label>
+  <select id="pet-type"></select>
+  <button onclick="createPet()">Создать</button>
+  <button onclick="showScreen('main-menu')">Назад</button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div class="stats-banner">Тёплая забота согреет даже в самый снежный день</div>
+  <div id="pet-info">Питомец ещё не создан.</div>
+  <div id="hunger">Сытость: -</div>
+  <div id="happiness">Счастье: -</div>
+  <div id="energy">Энергия: -</div>
+  <div id="rage" style="display:none;">Ярость: -</div>
+  <div id="warning-banner" class="warning-banner" style="display:none;"></div>
+  <div class="actions">
+    <button id="btn-feed" onclick="onFeed()" disabled>Кормить</button>
+    <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
+    <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
+  </div>
+  <button onclick="showScreen('shop-screen')">Магазин</button>
+  <button onclick="exitToMenu()">Назад</button>
+  <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
+</div>
+
+<div id="shop-screen" class="screen">
+  <h2>Магазин чудес</h2>
+  <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
+  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
+  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
+  <button onclick="buyPotion('strength')">Зелье силы — 40 🪙<br><small>+50 ко всем статам</small></button>  <button id="btn-calm" onclick="buyPotion('calm')">Зелье спокойствия — 20 🪙<br><small>Снижает ярость на 50 (только для Диких Зверей)</small></button>
+  <button onclick="showScreen('game-screen')">Назад в игру</button>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-content" id="modal-content"></div>
+</div>
+
+<script>
+const BASE_PET_TYPES = ["Собака", "Кошка", "Попугай"];
+const ADDON_PET_TYPES = [
+  "Арангутант",
+  "Черепаха",
+  "Одиндиндун",
+  "Пчела",
+  "бр бр бр бр патапим",
+  "gramma",
+  "maddung",
+  "Didiblat(NEW)",
+  "Корова(NEW)"
+];
+const SECRET_PET = "Панда (SECRET)";
+const MEGA_SECRET_PET = "Леопард (MEGASECRET)";
+const WILD_BEASTS = new Set([MEGA_SECRET_PET]); // Множество диких зверей
+
+let pet = null;
+let enabledAddonTypes = new Set();
+let interfaceStyle = "new_year";
+let theme = "dark";
+let tickInterval = null;
+let secretUnlocked = false;
+let megaSecretUnlocked = false;
+let gold = 0;
+let goldInterval = null;
+let satietyPotionActive = false;
+let satietyPotionTimer = null;
+let rageTimer = null;
+let gameEnded = false;
+
+// Статистика
+let totalEarnedGold = 0;
+let ownedPets = new Set();
+let gameTimeSeconds = 0;
+let gameTimerInterval = null;
+
+// Загрузка статистики из localStorage
+function loadStats() {
+  try {
+    const saved = localStorage.getItem('tamagochi_stats');
+    if (saved) {      const data = JSON.parse(saved);
+      totalEarnedGold = data.totalEarnedGold || 0;
+      gameTimeSeconds = data.gameTimeSeconds || 0;
+      if (Array.isArray(data.ownedPets)) {
+        ownedPets = new Set(data.ownedPets);
+      }
+      secretUnlocked = data.secretUnlocked || false;
+      megaSecretUnlocked = data.megaSecretUnlocked || false;
+      interfaceStyle = data.interfaceStyle || "new_year";
+      if (Array.isArray(data.enabledAddonTypes)) {
+        enabledAddonTypes = new Set(data.enabledAddonTypes);
+      }
+    }
+  } catch (e) {
+    console.error("Ошибка загрузки статистики:", e);
+  }
+}
+
+// Сохранение статистики в localStorage
+function saveStats() {
+  try {
+    localStorage.setItem('tamagochi_stats', JSON.stringify({
+      totalEarnedGold,
+      gameTimeSeconds,
+      ownedPets: Array.from(ownedPets),
+      secretUnlocked,
+      megaSecretUnlocked,
+      interfaceStyle,
+      enabledAddonTypes: Array.from(enabledAddonTypes)
+    }));
+  } catch (e) {
+    console.error("Ошибка сохранения статистики:", e);
+  }
+}
+
+class Pet {
+  constructor(name, petType) {
+    this.name = name;
+    this.petType = petType;
+    this.isWildBeast = WILD_BEASTS.has(petType);
+
+    this.maxStat = this.isWildBeast ? 300 : 100;
+    this.hunger = this.maxStat;
+    this.happiness = this.maxStat;
+    this.energy = this.maxStat;
+    this.rage = this.isWildBeast ? 0 : null;
+    this.alive = true;
+    this.rageCountdownActive = false;
+    this.rageCountdownTime = 0;
+  }
+  _clampStats() {
+    this.hunger = Math.max(0, Math.min(this.maxStat, this.hunger));
+    this.happiness = Math.max(0, Math.min(this.maxStat, this.happiness));
+    this.energy = Math.max(0, Math.min(this.maxStat, this.energy));
+
+    if (this.isWildBeast && this.rage !== null) {
+      this.rage = Math.max(0, Math.min(this.maxStat, this.rage));
+
+      if (this.rage >= this.maxStat && !this.rageCountdownActive) {
+        this.triggerRageCountdown();
+      }
+    }
+
+    if (this.hunger === 0) this.alive = false;
+  }
+
+  feed() {
+    if (!this.alive || gameEnded) return;
+    this.hunger += 20;
+    this.energy += 5;
+    if (this.isWildBeast) {
+      this.rage = Math.max(0, this.rage - 10);
+    }
+    this._clampStats();
+  }
+
+  play() {
+    if (!this.alive || gameEnded) return;
+    this.happiness += 15;
+    this.hunger -= 10;
+    this.energy -= 10;
+    if (this.isWildBeast) {
+      this.rage += 5;
+    }
+    this._clampStats();
+  }
+
+  sleep() {
+    if (!this.alive || gameEnded) return;
+    this.energy += 25;
+    this.hunger -= 5;
+    if (this.isWildBeast) {
+      this.rage = Math.max(0, this.rage - 15);
+    }
+    this._clampStats();
+  }
+
+  tick() {
+    if (!this.alive || gameEnded) return;
+    if (!satietyPotionActive) {
+      this.hunger -= 3;
+    }
+    this.happiness -= 1;
+    this.energy -= 1;
+
+    if (this.isWildBeВот исправленный исходный код с рабочими кнопками и добавленной статистикой:
+
 ```html
 <!DOCTYPE html>
 <html lang="ru">
@@ -235,15 +439,15 @@
     }
     h1 {
       font-size: 22px;
-      font-weight: bold;
-      text-align: center;
+      font-weight: bold;      text-align: center;
       margin-bottom: 10px;
       color: #e63946;
     }
     h2 {
       text-align: center;
       margin: 10px 0 16px;
-      color: #56ccf2;    }
+      color: #56ccf2;
+    }
     p {
       text-align: center;
       margin: 0 0 20px;
@@ -284,15 +488,15 @@
       text-align: center;
       font-style: italic;
       color: #a0e0ff;
-      margin-bottom: 8px;
-      font-size: 14px;
+      margin-bottom: 8px;      font-size: 14px;
     }
     .actions {
       display: flex;
       gap: 6px;
       margin: 16px 0;
     }
-    .actions button {      flex: 1;
+    .actions button {
+      flex: 1;
       font-size: 14px;
       padding: 12px;
     }
@@ -333,15 +537,15 @@
       margin: 0 10px 0 0;
       cursor: pointer;
     }
-    .checkbox-list input[type="radio"] {
-      width: auto;
+    .checkbox-list input[type="radio"] {      width: auto;
       margin: 0 10px 0 0;
       cursor: pointer;
     }
     .modal-content label {
       display: flex;
       align-items: center;
-      margin: 8px 0;      cursor: pointer;
+      margin: 8px 0;
+      cursor: pointer;
     }
     .modal-content input[type="radio"] {
       width: auto;
@@ -382,14 +586,14 @@
     }
     .stats-item {
       background: rgba(20, 40, 60, 0.6);
-      padding: 10px;
-      border-radius: 6px;
+      padding: 10px;      border-radius: 6px;
       margin: 8px 0;
       text-align: left;
     }
   </style>
 </head>
 <body>
+
 <div class="decor-bar">
   <span class="decor-left">❆</span>
   <span class="decor-center">Зимняя сказка</span>
@@ -431,15 +635,15 @@
     <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
     <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
   </div>
-  <button onclick="showScreen('shop-screen')">Магазин</button>
-  <button onclick="goBackToMenu()">Назад</button>
+  <button onclick="showScreen('shop-screen')">Магазин</button>  <button onclick="exitToMenu()">Назад</button>
   <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
 </div>
 
 <div id="shop-screen" class="screen">
   <h2>Магазин чудес</h2>
   <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
-  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
+  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
+  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
   <button onclick="buyPotion('strength')">Зелье силы — 40 🪙<br><small>+50 ко всем статам</small></button>
   <button id="btn-calm" onclick="buyPotion('calm')">Зелье спокойствия — 20 🪙<br><small>Снижает ярость на 50 (только для Диких Зверей)</small></button>
   <button onclick="showScreen('game-screen')">Назад в игру</button>
@@ -466,7 +670,6 @@ const SECRET_PET = "Панда (SECRET)";
 const MEGA_SECRET_PET = "Леопард (MEGASECRET)";
 const WILD_BEASTS = new Set([MEGA_SECRET_PET]); // Множество диких зверей
 
-// Глобальные переменные
 let pet = null;
 let enabledAddonTypes = new Set();
 let interfaceStyle = "new_year";
@@ -481,42 +684,38 @@ let satietyPotionTimer = null;
 let rageTimer = null;
 let gameEnded = false;
 
-// Статистика (загружаем из localStorage при старте)
-let totalEarnedGold = 0;
+// Статистикаlet totalEarnedGold = 0;
 let ownedPets = new Set();
 let gameTimeSeconds = 0;
 let gameTimerInterval = null;
 
-// Загрузка данных из localStorage при старте
-function loadStatsFromStorage() {  try {
-    const saved = localStorage.getItem('tamagochiStats');
+// Загрузка статистики из localStorage
+function loadStats() {
+  try {
+    const saved = localStorage.getItem('tamagochi_stats');
     if (saved) {
       const data = JSON.parse(saved);
       totalEarnedGold = data.totalEarnedGold || 0;
       gameTimeSeconds = data.gameTimeSeconds || 0;
-      if (data.ownedPets && Array.isArray(data.ownedPets)) {
+      if (Array.isArray(data.ownedPets)) {
         ownedPets = new Set(data.ownedPets);
       }
       secretUnlocked = data.secretUnlocked || false;
       megaSecretUnlocked = data.megaSecretUnlocked || false;
-      
-      // Загружаем настройки интерфейса
-      if (data.interfaceStyle) interfaceStyle = data.interfaceStyle;
-      if (data.enabledAddonTypes && Array.isArray(data.enabledAddonTypes)) {
+      interfaceStyle = data.interfaceStyle || "new_year";
+      if (Array.isArray(data.enabledAddonTypes)) {
         enabledAddonTypes = new Set(data.enabledAddonTypes);
       }
     }
   } catch (e) {
-    console.error("Ошибка загрузки сохранения:", e);
-    // Если ошибка - сбрасываем сохранение
-    localStorage.removeItem('tamagochiStats');
+    console.error("Ошибка загрузки статистики:", e);
   }
 }
 
-// Сохранение данных в localStorage
-function saveStatsToStorage() {
+// Сохранение статистики в localStorage
+function saveStats() {
   try {
-    const data = {
+    localStorage.setItem('tamagochi_stats', JSON.stringify({
       totalEarnedGold,
       gameTimeSeconds,
       ownedPets: Array.from(ownedPets),
@@ -524,40 +723,25 @@ function saveStatsToStorage() {
       megaSecretUnlocked,
       interfaceStyle,
       enabledAddonTypes: Array.from(enabledAddonTypes)
-    };
-    localStorage.setItem('tamagochiStats', JSON.stringify(data));
+    }));
   } catch (e) {
-    console.error("Ошибка сохранения:", e);
+    console.error("Ошибка сохранения статистики:", e);
   }
-}
-
-// Функция возврата в главное меню
-function goBackToMenu() {
-  showScreen('main-menu');
-  clearInterval(tickInterval);
-  clearInterval(goldInterval);
-  clearInterval(rageTimer);
-  clearInterval(gameTimerInterval);  gameTimerInterval = null;
-  pet = null;
-  gold = 0;
-  saveStatsToStorage();
 }
 
 class Pet {
   constructor(name, petType) {
     this.name = name;
     this.petType = petType;
-    this.isWildBeast = WILD_BEASTS.has(petType); // Флаг дикого зверя
-
-    // Для диких зверей статы 300, для обычных - 100
+    this.isWildBeast = WILD_BEASTS.has(petType);
     this.maxStat = this.isWildBeast ? 300 : 100;
     this.hunger = this.maxStat;
     this.happiness = this.maxStat;
     this.energy = this.maxStat;
-    this.rage = this.isWildBeast ? 0 : null; // Ярость только у диких зверей
+    this.rage = this.isWildBeast ? 0 : null;
     this.alive = true;
-    this.rageCountdownActive = false; // Флаг активного отсчета ярости
-    this.rageCountdownTime = 0; // Время отсчета в секундах (300 сек = 5 минут)
+    this.rageCountdownActive = false;
+    this.rageCountdownTime = 0;
   }
 
   _clampStats() {
@@ -568,7 +752,6 @@ class Pet {
     if (this.isWildBeast && this.rage !== null) {
       this.rage = Math.max(0, Math.min(this.maxStat, this.rage));
 
-      // Проверка на максимальную ярость
       if (this.rage >= this.maxStat && !this.rageCountdownActive) {
         this.triggerRageCountdown();
       }
@@ -582,27 +765,27 @@ class Pet {
     this.hunger += 20;
     this.energy += 5;
     if (this.isWildBeast) {
-      this.rage = Math.max(0, this.rage - 10); // Кормление снижает ярость
+      this.rage = Math.max(0, this.rage - 10);
     }
     this._clampStats();
   }
+
   play() {
     if (!this.alive || gameEnded) return;
     this.happiness += 15;
     this.hunger -= 10;
     this.energy -= 10;
     if (this.isWildBeast) {
-      this.rage += 5; // Игра повышает ярость у диких зверей
+      this.rage += 5;
     }
     this._clampStats();
   }
 
   sleep() {
-    if (!this.alive || gameEnded) return;
-    this.energy += 25;
+    if (!this.alive || gameEnded) return;    this.energy += 25;
     this.hunger -= 5;
     if (this.isWildBeast) {
-      this.rage = Math.max(0, this.rage - 15); // Сон снижает ярость
+      this.rage = Math.max(0, this.rage - 15);
     }
     this._clampStats();
   }
@@ -617,7 +800,7 @@ class Pet {
     this.energy -= 1;
 
     if (this.isWildBeast) {
-      this.rage += 2; // Ярость растет со временем
+      this.rage += 2;
     }
 
     this._clampStats();
@@ -635,7 +818,8 @@ class Pet {
 
   boostAll() {
     this.hunger = Math.min(this.maxStat, this.hunger + 50);
-    this.happiness = Math.min(this.maxStat, this.happiness + 50);    this.energy = Math.min(this.maxStat, this.energy + 50);
+    this.happiness = Math.min(this.maxStat, this.happiness + 50);
+    this.energy = Math.min(this.maxStat, this.energy + 50);
     this.alive = true;
     this._clampStats();
   }
@@ -647,23 +831,19 @@ class Pet {
     return true;
   }
 
-  triggerRageCountdown() {
-    this.rageCountdownActive = true;
-    this.rageCountdownTime = 300; // 5 минут = 300 секунд
+  triggerRageCountdown() {    this.rageCountdownActive = true;
+    this.rageCountdownTime = 300;
 
-    // Показываем предупреждение
     showDangerModal("Вас съедает Дикий Зверь!");
 
-    // Начинаем отсчет
     clearInterval(rageTimer);
     rageTimer = setInterval(() => {
       this.rageCountdownTime--;
 
-      // Обновляем предупреждение
-      if (document.getElementById('warning-banner')) {
-        document.getElementById('warning-banner').textContent = 
-          `⚠️ Дикий Зверь нападет через ${Math.ceil(this.rageCountdownTime / 60)} мин ${this.rageCountdownTime % 60} сек!`;
-        document.getElementById('warning-banner').style.display = 'block';
+      const warning = document.getElementById('warning-banner');
+      if (warning) {
+        warning.textContent = `⚠️ Дикий Зверь нападет через ${Math.floor(this.rageCountdownTime / 60)} мин ${this.rageCountdownTime % 60} сек!`;
+        warning.style.display = 'block';
       }
 
       if (this.rageCountdownTime <= 0) {
@@ -677,14 +857,17 @@ class Pet {
     gameEnded = true;
     showDangerModal(`Вас съел ${this.petType}!`);
 
-    // Отключаем все кнопки
-    if (document.getElementById('btn-feed')) document.getElementById('btn-feed').disabled = true;
-    if (document.getElementById('btn-play')) document.getElementById('btn-play').disabled = true;
-    if (document.getElementById('btn-sleep')) document.getElementById('btn-sleep').disabled = true;
+    const btnFeed = document.getElementById('btn-feed');
+    const btnPlay = document.getElementById('btn-play');
+    const btnSleep = document.getElementById('btn-sleep');
+    if (btnFeed) btnFeed.disabled = true;
+    if (btnPlay) btnPlay.disabled = true;
+    if (btnSleep) btnSleep.disabled = true;
   }
 }
 
-const INTERFACE_METADATA = {  new_year: {
+const INTERFACE_METADATA = {
+  new_year: {
     title: "Новогодний тамагочи",
     decor: { left: "❆", center: "Зимняя сказка", right: "❆" },
     statsBanner: "Тёплая забота согреет даже в самый снежный день",
@@ -697,8 +880,7 @@ const INTERFACE_METADATA = {  new_year: {
     footer: "Кормите, играйте и отдыхайте, чтобы прогнать тьму"
   },
   holiday: {
-    title: "Праздничный тамагочи",
-    decor: { left: "* *", center: "Праздничное настроение", right: "* *" },
+    title: "Праздничный тамагочи",    decor: { left: "* *", center: "Праздничное настроение", right: "* *" },
     statsBanner: "Пусть праздник продолжается – береги силы и радость питомца",
     footer: "Игры и угощения делают праздник ярче"
   }
@@ -726,35 +908,30 @@ function showDangerModal(message) {
     <button onclick="closeModal()">Понятно</button>
   `;
   openModal(content);
-
-  // Автоматически закроем через 3 секунды
   setTimeout(closeModal, 3000);
 }
 
 function applyInterfaceMetadata() {
   const meta = INTERFACE_METADATA[interfaceStyle];
-  document.title = meta.title;  document.getElementById('main-title').textContent = meta.title;
+  document.title = meta.title;
+  document.getElementById('main-title').textContent = meta.title;
   document.querySelector('.decor-left').textContent = meta.decor.left;
   document.querySelector('.decor-center').textContent = meta.decor.center;
   document.querySelector('.decor-right').textContent = meta.decor.right;
+  const statsBanner = document.querySelector('.stats-banner');
+  const footer = document.querySelector('.footer');
+  if (statsBanner) statsBanner.textContent = meta.statsBanner;
+  if (footer) footer.textContent = meta.footer;
+  
   const bgMap = {
     new_year: 'linear-gradient(to bottom, #04101f, #0d2438)',
     halloween: 'linear-gradient(to bottom, #120818, #241020)',
     holiday: 'linear-gradient(to bottom, #021b21, #062b35)'
   };
   document.body.style.background = bgMap[interfaceStyle];
-  
-  // Обновляем баннеры и футер если они видны
-  const statsBanner = document.querySelector('.stats-banner');
-  const footer = document.querySelector('.footer');
-  if (statsBanner) statsBanner.textContent = meta.statsBanner;
-  if (footer) footer.textContent = meta.footer;
 }
-
 function refreshPetTypes() {
   const select = document.getElementById('pet-type');
-  if (!select) return;
-  
   select.innerHTML = '';
   const allTypes = [...BASE_PET_TYPES];
   ADDON_PET_TYPES.forEach(type => {
@@ -776,72 +953,47 @@ function refreshPetTypes() {
 
 function updateUI() {
   if (!pet) {
-    const petInfo = document.getElementById('pet-info');
-    const hunger = document.getElementById('hunger');
-    const happiness = document.getElementById('happiness');
-    const energy = document.getElementById('energy');
-    const rage = document.getElementById('rage');
-    const warning = document.getElementById('warning-banner');
-        if (petInfo) petInfo.textContent = "Питомец ещё не создан.";
-    if (hunger) hunger.textContent = "Сытость: -";
-    if (happiness) happiness.textContent = "Счастье: -";
-    if (energy) energy.textContent = "Энергия: -";
-    if (rage) rage.style.display = 'none';
-    if (warning) warning.style.display = 'none';
+    document.getElementById('pet-info').textContent = "Питомец ещё не создан.";
+    document.getElementById('hunger').textContent = "Сытость: -";
+    document.getElementById('happiness').textContent = "Счастье: -";
+    document.getElementById('energy').textContent = "Энергия: -";
+    document.getElementById('rage').style.display = 'none';
+    document.getElementById('warning-banner').style.display = 'none';
   } else {
     const status = pet.alive ? "живой" : "мертв";
-    const petInfo = document.getElementById('pet-info');
-    const hunger = document.getElementById('hunger');
-    const happiness = document.getElementById('happiness');
-    const energy = document.getElementById('energy');
-    const rage = document.getElementById('rage');
-    const warning = document.getElementById('warning-banner');
-    
-    if (petInfo) petInfo.textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
-    if (hunger) hunger.textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
-    if (happiness) happiness.textContent = `Счастье: ${pet.happiness}`;
-    if (energy) energy.textContent = `Энергия: ${pet.energy}`;
+    document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
+    document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
+    document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
+    document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
 
-    // Отображаем ярость для диких зверей
     if (pet.isWildBeast) {
-      if (rage) {
-        rage.style.display = 'block';
-        rage.textContent = `Ярость: ${pet.rage}/${pet.maxStat}`;
+      document.getElementById('rage').style.display = 'block';
+      document.getElementById('rage').textContent = `Ярость: ${pet.rage}/${pet.maxStat}`;
 
-        // Цвет индикатора ярости
-        const ragePercent = (pet.rage / pet.maxStat) * 100;
-        if (ragePercent > 70) {
-          rage.style.color = '#d32f2f';
-        } else if (ragePercent > 40) {
-          rage.style.color = '#ff9800';
-        } else {
-          rage.style.color = '#4caf50';
-        }
+      const ragePercent = (pet.rage / pet.maxStat) * 100;
+      if (ragePercent > 70) {
+        document.getElementById('rage').style.color = '#d32f2f';
+      } else if (ragePercent > 40) {
+        document.getElementById('rage').style.color = '#ff9800';
+      } else {
+        document.getElementById('rage').style.color = '#4caf50';
       }
-
-      // Показываем предупреждение если ярость высокая
       if (ragePercent > 80 && !pet.rageCountdownActive) {
-        if (warning) {
-          warning.textContent = `⚠️ ${pet.petType} становится опасным!`;
-          warning.style.display = 'block';
-        }
+        document.getElementById('warning-banner').textContent = `⚠️ ${pet.petType} становится опасным!`;
+        document.getElementById('warning-banner').style.display = 'block';
       } else if (!pet.rageCountdownActive) {
-        if (warning) warning.style.display = 'none';
+        document.getElementById('warning-banner').style.display = 'none';
       }
     } else {
-      if (rage) rage.style.display = 'none';
-      if (warning) warning.style.display = 'none';
+      document.getElementById('rage').style.display = 'none';
+      document.getElementById('warning-banner').style.display = 'none';
     }
-    const buttonsEnabled = pet.alive && !gameEnded;
-    const btnFeed = document.getElementById('btn-feed');
-    const btnPlay = document.getElementById('btn-play');
-    const btnSleep = document.getElementById('btn-sleep');
-    
-    if (btnFeed) btnFeed.disabled = !buttonsEnabled;
-    if (btnPlay) btnPlay.disabled = !buttonsEnabled;
-    if (btnSleep) btnSleep.disabled = !buttonsEnabled;
 
-    // Обновляем кнопку зелья спокойствия в магазине
+    const buttonsEnabled = pet.alive && !gameEnded;
+    document.getElementById('btn-feed').disabled = !buttonsEnabled;
+    document.getElementById('btn-play').disabled = !buttonsEnabled;
+    document.getElementById('btn-sleep').disabled = !buttonsEnabled;
+
     const calmBtn = document.getElementById('btn-calm');
     if (calmBtn) {
       if (pet.isWildBeast && pet.alive && !gameEnded) {
@@ -854,9 +1006,7 @@ function updateUI() {
     }
   }
 
-  // Обновляем монеты в магазине
-  const goldEl = document.getElementById('gold');
-  if (goldEl) goldEl.textContent = gold;
+  document.getElementById('gold').textContent = gold;
 }
 
 function onFeed() { if (pet) { pet.feed(); updateUI(); } }
@@ -877,10 +1027,10 @@ function buyPotion(type) {
   } else if (type === 'satiety' && pet && pet.alive && !gameEnded) {
     cost = 30;
     if (gold >= cost) {
-      gold -= cost;
-      satietyPotionActive = true;
+      gold -= cost;      satietyPotionActive = true;
       success = true;
-      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);      satietyPotionTimer = setTimeout(() => {
+      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);
+      satietyPotionTimer = setTimeout(() => {
         satietyPotionActive = false;
         satietyPotionTimer = null;
         updateUI();
@@ -905,14 +1055,11 @@ function buyPotion(type) {
   if (success) {
     updateUI();
     const message = `<div class="success-message">✅ Куплено!</div>`;
-    const modalContent = document.getElementById('modal-content');
-    if (modalContent) {
-      modalContent.insertAdjacentHTML('beforeend', message);
-      setTimeout(() => {
-        const msg = document.querySelector('.success-message');
-        if (msg) msg.remove();
-      }, 2000);
-    }
+    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+    setTimeout(() => {
+      const msg = document.querySelector('.success-message');
+      if (msg) msg.remove();
+    }, 2000);
   } else {
     if (type === 'calm' && pet && !pet.isWildBeast) {
       alert("Зелье спокойствия работает только на Диких Зверях!");
@@ -923,24 +1070,18 @@ function buyPotion(type) {
 }
 
 function createPet() {
-  const nameInput = document.getElementById('pet-name');
-  if (!nameInput) return;
-  
-  const name = nameInput.value.trim() || "Питомец";
-  const typeSelect = document.getElementById('pet-type');
-  if (!typeSelect) return;
-    const type = typeSelect.value;
+  const name = document.getElementById('pet-name').value.trim() || "Питомец";
+  const type = document.getElementById('pet-type').value;
   pet = new Pet(name, type);
   gameEnded = false;
   satietyPotionActive = false;
   if (satietyPotionTimer) {
-    clearTimeout(satietyPotionTimer);
-    satietyPotionTimer = null;
+    clearTimeout(satietyPotionTimer);    satietyPotionTimer = null;
   }
   
-  // Сохраняем питомца в статистику
+  // Сохраняем питомца в статистике
   ownedPets.add(pet.petType);
-  saveStatsToStorage();
+  saveStats();
   
   updateUI();
   showScreen('game-screen');
@@ -953,18 +1094,17 @@ function createPet() {
   clearInterval(goldInterval);
   goldInterval = setInterval(() => {
     gold += 1;
-    totalEarnedGold += 1; // Увеличиваем общее количество заработанных монет
-    saveStatsToStorage(); // Сохраняем
+    totalEarnedGold += 1;
+    saveStats();
     updateUI();
   }, 5000);
   
   // Запускаем таймер игрового времени
-  if (!gameTimerInterval) {
-    gameTimerInterval = setInterval(() => {
-      gameTimeSeconds++;
-      saveStatsToStorage(); // Сохраняем каждую секунду
-    }, 1000);
-  }
+  clearInterval(gameTimerInterval);
+  gameTimerInterval = setInterval(() => {
+    gameTimeSeconds++;
+    saveStats();
+  }, 1000);
 }
 
 function showCreateScreen() {
@@ -978,14 +1118,14 @@ function openSettings() {
     <h3>Настройки</h3>
     <p>Тема игры:</p>
     <label>
-      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>      Тёмная
+      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>
+      Тёмная
     </label>
     <label>
       <input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}>
       Светлая
     </label>
-    <br><br>
-    <button onclick="saveSettings()">Сохранить</button>
+    <br><br>    <button onclick="saveSettings()">Сохранить</button>
   `;
   openModal(content);
 }
@@ -1026,17 +1166,15 @@ function openAddons() {
 
 function saveAddons() {
   enabledAddonTypes.clear();
-  const checkboxes = document.querySelectorAll('#modal-content input[type="checkbox"]:checked');
-  checkboxes.forEach(cb => {    enabledAddonTypes.add(cb.value);
-  });
-  saveStatsToStorage(); // Сохраняем
+  document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
+    .forEach(cb => enabledAddonTypes.add(cb.value));
+  saveStats();
   closeModal();
 }
 
 function openInterfaceSettings() {
   const current = interfaceStyle;
-  const content = `
-    <h3>Выберите вариант интерфейса:</h3>
+  const content = `    <h3>Выберите вариант интерфейса:</h3>
     <label>
       <input type="radio" name="iface" value="new_year" ${current === 'new_year' ? 'checked' : ''}>
       Новогодний интерфейс (базовый)
@@ -1064,7 +1202,7 @@ function saveInterface() {
     }
   }
   applyInterfaceMetadata();
-  saveStatsToStorage(); // Сохраняем
+  saveStats();
   closeModal();
 }
 
@@ -1076,38 +1214,41 @@ function openSecretMenu() {
     <br><br>
     <button onclick="submitSecretCode()">Применить</button>
     <button onclick="closeModal()">Отмена</button>
-  `;  openModal(content);
+  `;
+  openModal(content);
 }
 
 function submitSecretCode() {
-  const codeInput = document.getElementById('secret-code');
-  if (!codeInput) return;
-  
-  const code = codeInput.value.trim();
+  const code = document.getElementById('secret-code').value.trim();
   if (code === "1x1x1") {
     secretUnlocked = true;
-    saveStatsToStorage(); // Сохраняем
-    const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;
-    const modalContent = document.getElementById('modal-content');
-    if (modalContent) {
-      modalContent.insertAdjacentHTML('beforeend', message);
-    }
+    saveStats();
+    const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
     refreshPetTypes();
   } else if (code === "Вкаминевшестьутра") {
     megaSecretUnlocked = true;
-    saveStatsToStorage(); // Сохраняем
+    saveStats();
     const message = `<div class="success-message">✅ MEGASECRET животное «${MEGA_SECRET_PET}» добавлено!</div>`;
-    const modalContent = document.getElementById('modal-content');
-    if (modalContent) {
-      modalContent.insertAdjacentHTML('beforeend', message);
-    }
+    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
     refreshPetTypes();
   } else {
     alert("Неверный код! Попробуйте ещё раз.");
   }
 }
 
-// Функция отображения статистики
+// Функция выхода в меню (исправлена!)
+function exitToMenu() {
+  showScreen('main-menu');
+  clearInterval(tickInterval);
+  clearInterval(goldInterval);
+  clearInterval(rageTimer);
+  clearInterval(gameTimerInterval);
+  pet = null;
+  gold = 0;
+  saveStats();
+}
+
+// Функция показа статистики
 function showStats() {
   const minutes = Math.floor(gameTimeSeconds / 60);
   const seconds = gameTimeSeconds % 60;
@@ -1125,40 +1266,35 @@ function showStats() {
     </div>
     <div class="stats-item">
       <strong>⏱️ Время в игре:</strong><br>
-      ${timeStr}    </div>
+      ${timeStr}
+    </div>
     <div class="stats-item">
       <strong>🐾 Ваши питомцы:</strong><br>
       ${petsList}
     </div>
-    <br>
-    <button onclick="resetStats()">Сбросить статистику</button>
+    <br>    <button onclick="if(confirm('Сбросить всю статистику?')){resetStats();}">Сбросить статистику</button>
     <button onclick="closeModal()">Закрыть</button>
   `;
   openModal(content);
 }
 
-// Функция сброса статистики
 function resetStats() {
-  if (confirm("Вы уверены, что хотите сбросить всю статистику? Это действие нельзя отменить!")) {
-    totalEarnedGold = 0;
-    ownedPets = new Set();
-    gameTimeSeconds = 0;
-    secretUnlocked = false;
-    megaSecretUnlocked = false;
-    enabledAddonTypes = new Set();
-    interfaceStyle = "new_year";
-    saveStatsToStorage();
-    closeModal();
-    alert("Статистика успешно сброшена!");
-    refreshPetTypes();
-    applyInterfaceMetadata();
-  }
+  totalEarnedGold = 0;
+  ownedPets = new Set();
+  gameTimeSeconds = 0;
+  secretUnlocked = false;
+  megaSecretUnlocked = false;
+  enabledAddonTypes = new Set();
+  interfaceStyle = "new_year";
+  saveStats();
+  closeModal();
+  alert("Статистика сброшена!");
+  refreshPetTypes();
+  applyInterfaceMetadata();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Загружаем сохраненные данные
-  loadStatsFromStorage();
-  
+  loadStats();
   applyInterfaceMetadata();
   refreshPetTypes();
 });
