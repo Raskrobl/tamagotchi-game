@@ -73,6 +73,12 @@
       background: #666;
       cursor: not-allowed;
     }
+    button.auth {
+      background: #4361ee;
+    }
+    button.danger {
+      background: #ef233c;
+    }
     input, select {
       width: 100%;
       padding: 8px;
@@ -185,6 +191,28 @@
       margin: 10px 0;
       font-weight: bold;
     }
+    .user-info {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: #56ccf2;
+    }
+    .auth-note {
+      background: #1a3a52;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 13px;
+      text-align: center;
+    }
+    .verification-code {
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 5px;
+      margin: 15px 0;
+      color: #ffcc00;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -195,7 +223,62 @@
   <span class="decor-right">❆</span>
 </div>
 
-<div id="main-menu" class="screen active">
+<!-- Экран входа -->
+<div id="auth-screen" class="screen active">
+  <h1>Новогодний тамагочи</h1>
+  <div class="user-info" id="current-user"></div>
+  
+  <div id="login-form">
+    <h2>Вход в аккаунт</h2>
+    <div class="auth-note">
+      ⚠️ Это демо-версия. В реальном приложении потребуется бэкенд для отправки писем.
+    </div>
+    <input type="text" id="login-username" placeholder="Никнейм" maxlength="15" />
+    <input type="password" id="login-password" placeholder="Пароль" maxlength="20" />
+    <button class="auth" onclick="login()">Войти</button>
+    <button onclick="showScreen('register-screen')">Регистрация</button>
+  </div>
+</div>
+
+<!-- Экран регистрации -->
+<div id="register-screen" class="screen">
+  <h2>Регистрация</h2>
+  <div class="auth-note">
+    Шаг 1: Введите email для получения кода подтверждения
+  </div>
+  <input type="email" id="register-email" placeholder="Ваш email" maxlength="50" />
+  <button class="auth" onclick="simulateEmailVerification()">Получить код</button>
+  <button onclick="showScreen('auth-screen')">Назад</button>
+</div>
+
+<!-- Экран верификации -->
+<div id="verify-screen" class="screen">
+  <h2>Подтверждение email</h2>
+  <div class="auth-note">
+    Код подтверждения (в демо-режиме показан здесь вместо отправки на почту):
+  </div>
+  <div class="verification-code" id="verification-code-display">----</div>
+  <input type="text" id="verification-code" placeholder="Код из 6 цифр" maxlength="6" />
+  <button class="auth" onclick="verifyCode()">Подтвердить</button>
+  <button onclick="showScreen('register-screen')">Назад</button>
+</div>
+
+<!-- Экран выбора никнейма -->
+<div id="nickname-screen" class="screen">
+  <h2>Выберите никнейм</h2>
+  <div class="auth-note">
+    Придумайте уникальный никнейм и пароль для входа
+  </div>
+  <input type="text" id="new-username" placeholder="Никнейм (3-15 символов)" maxlength="15" />
+  <input type="password" id="new-password" placeholder="Пароль (мин. 6 символов)" maxlength="20" />
+  <input type="password" id="confirm-password" placeholder="Повторите пароль" maxlength="20" />
+  <button class="auth" onclick="createAccount()">Создать аккаунт</button>
+  <button onclick="showScreen('verify-screen')">Назад</button>
+</div>
+
+<!-- Основное меню игры -->
+<div id="main-menu" class="screen">
+  <div class="user-info" id="menu-user-info"></div>
   <h1 id="main-title">Новогодний тамагочи</h1>
   <p id="main-subtitle">Нажмите "Играть", чтобы создать своего питомца!</p>
   <button onclick="showCreateScreen()">Играть</button>
@@ -204,9 +287,12 @@
   <button onclick="showCredits()">Создатели</button>
   <button onclick="openInterfaceSettings()">Интерфейс</button>
   <button onclick="openSecretMenu()">Подарки</button>
+  <button class="danger" onclick="logout()">Выйти из аккаунта</button>
 </div>
 
+<!-- Остальные экраны игры (создание питомца, игра, магазин) -->
 <div id="create-screen" class="screen">
+  <div class="user-info" id="create-user-info"></div>
   <h2>Создание питомца</h2>
   <label>Имя питомца:</label>
   <input type="text" id="pet-name" maxlength="20" placeholder="Питомец" />
@@ -217,6 +303,7 @@
 </div>
 
 <div id="game-screen" class="screen">
+  <div class="user-info" id="game-user-info"></div>
   <div class="stats-banner">Тёплая забота согреет даже в самый снежный день</div>
   <div id="pet-info">Питомец ещё не создан.</div>
   <div id="hunger">Сытость: -</div>
@@ -230,11 +317,12 @@
     <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
   </div>
   <button onclick="showScreen('shop-screen')">Магазин</button>
-  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); clearInterval(rageTimer); pet = null; gold = 0;">Назад</button>
+  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); clearInterval(rageTimer);">Назад</button>
   <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
 </div>
 
 <div id="shop-screen" class="screen">
+  <div class="user-info" id="shop-user-info"></div>
   <h2>Магазин чудес</h2>
   <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
   <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
@@ -249,6 +337,256 @@
 </div>
 
 <script>
+// ========== СИСТЕМА АУТЕНТИФИКАЦИИ ==========
+let currentUser = null;
+let pendingEmail = null;
+let verificationCode = null;
+
+// Проверка сохраненного аккаунта при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+  const savedUser = localStorage.getItem('tamagochi_current_user');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    showScreen('main-menu');
+    updateUserDisplays();
+    loadGameProgress();
+  } else {
+    showScreen('auth-screen');
+  }
+  applyInterfaceMetadata();
+  refreshPetTypes();
+});
+
+function updateUserDisplays() {
+  const nickname = currentUser ? currentUser.username : 'Гость';
+  document.querySelectorAll('.user-info').forEach(el => {
+    el.textContent = `👤 ${nickname}`;
+  });
+  document.getElementById('menu-user-info').textContent = `👤 ${nickname} | Монеты: ${currentUser?.gold || 0} 🪙`;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  
+  // Очистка полей форм при переключении
+  if (id === 'register-screen') {
+    document.getElementById('register-email').value = '';
+  } else if (id === 'verify-screen') {
+    document.getElementById('verification-code').value = '';
+  } else if (id === 'nickname-screen') {
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+  }
+}
+
+function simulateEmailVerification() {
+  const email = document.getElementById('register-email').value.trim();
+  if (!email || !email.includes('@')) {
+    alert('Введите корректный email!');
+    return;
+  }
+  
+  // Генерируем 6-значный код
+  verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  pendingEmail = email;
+  
+  // В демо-режиме показываем код на экране
+  document.getElementById('verification-code-display').textContent = verificationCode;
+  
+  showScreen('verify-screen');
+  
+  // Для реального приложения здесь был бы запрос к бэкенду:
+  // fetch('/api/send-verification', { method: 'POST', body: JSON.stringify({ email }) })
+}
+
+function verifyCode() {
+  const inputCode = document.getElementById('verification-code').value.trim();
+  if (inputCode === verificationCode) {
+    showScreen('nickname-screen');
+  } else {
+    alert('Неверный код подтверждения!');
+  }
+}
+
+function createAccount() {
+  const username = document.getElementById('new-username').value.trim();
+  const password = document.getElementById('new-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  
+  // Валидация
+  if (username.length < 3 || username.length > 15) {
+    alert('Никнейм должен быть от 3 до 15 символов!');
+    return;
+  }
+  
+  if (password.length < 6) {
+    alert('Пароль должен быть не менее 6 символов!');
+    return;
+  }
+  
+  if (password !== confirmPassword) {
+    alert('Пароли не совпадают!');
+    return;
+  }
+  
+  // Проверка уникальности никнейма
+  const accounts = JSON.parse(localStorage.getItem('tamagochi_accounts') || '{}');
+  if (accounts[username]) {
+    alert('Такой никнейм уже существует!');
+    return;
+  }
+  
+  // Создаем аккаунт (в реальном приложении пароль нужно хешировать!)
+  accounts[username] = {
+    email: pendingEmail,
+    password: password, // ⚠️ В реальном приложении НИКОГДА не храните пароли в открытом виде!
+    created: new Date().toISOString(),
+    gold: 0,
+    pet: null
+  };
+  
+  localStorage.setItem('tamagochi_accounts', JSON.stringify(accounts));
+  
+  // Авторизуем пользователя
+  currentUser = {
+    username: username,
+    email: pendingEmail,
+    gold: 0,
+    pet: null
+  };
+  
+  localStorage.setItem('tamagochi_current_user', JSON.stringify(currentUser));
+  updateUserDisplays();
+  
+  // Очистка временных данных
+  pendingEmail = null;
+  verificationCode = null;
+  
+  showScreen('main-menu');
+  showSuccessModal('Аккаунт успешно создан! Добро пожаловать в игру!');
+}
+
+function login() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  
+  if (!username || !password) {
+    alert('Введите никнейм и пароль!');
+    return;
+  }
+  
+  const accounts = JSON.parse(localStorage.getItem('tamagochi_accounts') || '{}');
+  const account = accounts[username];
+  
+  if (!account || account.password !== password) {
+    alert('Неверный никнейм или пароль!');
+    return;
+  }
+  
+  // Загружаем прогресс пользователя
+  currentUser = {
+    username: username,
+    email: account.email,
+    gold: account.gold || 0,
+    pet: account.pet ? JSON.parse(account.pet) : null
+  };
+  
+  localStorage.setItem('tamagochi_current_user', JSON.stringify(currentUser));
+  updateUserDisplays();
+  loadGameProgress();
+  
+  showScreen('main-menu');
+}
+
+function logout() {
+  saveGameProgress();
+  currentUser = null;
+  localStorage.removeItem('tamagochi_current_user');
+  gold = 0;
+  pet = null;
+  clearInterval(tickInterval);
+  clearInterval(goldInterval);
+  clearInterval(rageTimer);
+  showScreen('auth-screen');
+}
+
+function saveGameProgress() {
+  if (!currentUser) return;
+  
+  const accounts = JSON.parse(localStorage.getItem('tamagochi_accounts') || '{}');
+  const account = accounts[currentUser.username];
+  
+  if (account) {
+    account.gold = gold;
+    account.pet = pet ? JSON.stringify({
+      name: pet.name,
+      petType: pet.petType,
+      hunger: pet.hunger,
+      happiness: pet.happiness,
+      energy: pet.energy,
+      rage: pet.rage,
+      alive: pet.alive,
+      isWildBeast: pet.isWildBeast,
+      maxStat: pet.maxStat,
+      rageCountdownActive: pet.rageCountdownActive,
+      rageCountdownTime: pet.rageCountdownTime
+    }) : null;
+    
+    localStorage.setItem('tamagochi_accounts', JSON.stringify(accounts));
+  }
+}
+
+function loadGameProgress() {
+  if (!currentUser) return;
+  
+  gold = currentUser.gold || 0;
+  
+  if (currentUser.pet) {
+    const savedPet = currentUser.pet;
+    pet = new Pet(savedPet.name, savedPet.petType);
+    pet.hunger = savedPet.hunger;
+    pet.happiness = savedPet.happiness;
+    pet.energy = savedPet.energy;
+    pet.alive = savedPet.alive;
+    
+    if (savedPet.isWildBeast) {
+      pet.rage = savedPet.rage || 0;
+      pet.rageCountdownActive = savedPet.rageCountdownActive || false;
+      pet.rageCountdownTime = savedPet.rageCountdownTime || 0;
+      
+      if (pet.rageCountdownActive) {
+        startRageCountdown();
+      }
+    }
+    
+    // Возобновляем таймеры игры
+    clearInterval(tickInterval);
+    tickInterval = setInterval(() => {
+      if (pet) { pet.tick(); updateUI(); }
+    }, 3000);
+    
+    clearInterval(goldInterval);
+    goldInterval = setInterval(() => {
+      gold += 1;
+      updateUI();
+    }, 5000);
+  }
+  
+  updateUI();
+}
+
+function showSuccessModal(message) {
+  const content = `
+    <div class="success-message">${message}</div>
+    <br>
+    <button onclick="closeModal()">OK</button>
+  `;
+  openModal(content);
+}
+
+// ========== ИГРОВАЯ ЛОГИКА (без изменений, только добавлены глобальные переменные) ==========
 const BASE_PET_TYPES = ["Собака", "Кошка", "Попугай"];
 const ADDON_PET_TYPES = [
   "Арангутант",
@@ -263,7 +601,7 @@ const ADDON_PET_TYPES = [
 ];
 const SECRET_PET = "Панда (SECRET)";
 const MEGA_SECRET_PET = "Леопард (MEGASECRET)";
-const WILD_BEASTS = new Set([MEGA_SECRET_PET]); // Множество диких зверей
+const WILD_BEASTS = new Set([MEGA_SECRET_PET]);
 
 let pet = null;
 let enabledAddonTypes = new Set();
@@ -283,18 +621,17 @@ class Pet {
   constructor(name, petType) {
     this.name = name;
     this.petType = petType;
-    this.isWildBeast = WILD_BEASTS.has(petType); // Флаг дикого зверя
+    this.isWildBeast = WILD_BEASTS.has(petType);
     
-    // Для диких зверей статы 300, для обычных - 100
     this.maxStat = this.isWildBeast ? 300 : 100;
     this.hunger = this.maxStat;
     this.happiness = this.maxStat;
     this.energy = this.maxStat;
-    this.rage = this.isWildBeast ? 0 : null; // Ярость только у диких зверей (максимум 100)
-    this.maxRage = 100; // Максимум ярости всегда 100
+    this.rage = this.isWildBeast ? 0 : null;
+    this.maxRage = 100;
     this.alive = true;
-    this.rageCountdownActive = false; // Флаг активного отсчета ярости
-    this.rageCountdownTime = 0; // Время отсчета в секундах (300 сек = 5 минут)
+    this.rageCountdownActive = false;
+    this.rageCountdownTime = 0;
   }
 
   _clampStats() {
@@ -305,7 +642,6 @@ class Pet {
     if (this.isWildBeast && this.rage !== null) {
       this.rage = Math.max(0, Math.min(this.maxRage, this.rage));
       
-      // Проверка на максимальную ярость (100)
       if (this.rage >= this.maxRage && !this.rageCountdownActive) {
         this.triggerRageCountdown();
       }
@@ -319,7 +655,7 @@ class Pet {
     this.hunger += 20;
     this.energy += 5;
     if (this.isWildBeast) {
-      this.rage = Math.max(0, this.rage - 10); // Кормление снижает ярость
+      this.rage = Math.max(0, this.rage - 10);
     }
     this._clampStats();
   }
@@ -330,7 +666,7 @@ class Pet {
     this.hunger -= 10;
     this.energy -= 10;
     if (this.isWildBeast) {
-      this.rage += 8; // Игра повышает ярость у диких зверей (ускорено для баланса)
+      this.rage += 8;
     }
     this._clampStats();
   }
@@ -340,7 +676,7 @@ class Pet {
     this.energy += 25;
     this.hunger -= 5;
     if (this.isWildBeast) {
-      this.rage = Math.max(0, this.rage - 15); // Сон снижает ярость
+      this.rage = Math.max(0, this.rage - 15);
     }
     this._clampStats();
   }
@@ -355,7 +691,7 @@ class Pet {
     this.energy -= 1;
     
     if (this.isWildBeast) {
-      this.rage += 3; // Ярость растет со временем (ускорено для баланса)
+      this.rage += 3;
     }
     
     this._clampStats();
@@ -388,27 +724,10 @@ class Pet {
 
   triggerRageCountdown() {
     this.rageCountdownActive = true;
-    this.rageCountdownTime = 300; // 5 минут = 300 секунд
+    this.rageCountdownTime = 300;
     
-    // Показываем предупреждение
     showDangerModal("Вас съедает Дикий Зверь!");
-    
-    // Начинаем отсчет
-    clearInterval(rageTimer);
-    rageTimer = setInterval(() => {
-      this.rageCountdownTime--;
-      
-      // Обновляем предупреждение
-      if (document.getElementById('warning-banner')) {
-        document.getElementById('warning-banner').textContent = 
-          `⚠️ Дикий Зверь нападет через ${Math.floor(this.rageCountdownTime / 60)} мин ${this.rageCountdownTime % 60} сек!`;
-        document.getElementById('warning-banner').style.display = 'block';
-      }
-      
-      if (this.rageCountdownTime <= 0) {
-        this.endGame();
-      }
-    }, 1000);
+    startRageCountdown();
   }
 
   endGame() {
@@ -416,11 +735,40 @@ class Pet {
     gameEnded = true;
     showDangerModal(`Вас съел ${this.petType}!`);
     
-    // Отключаем все кнопки
-    if (document.getElementById('btn-feed')) document.getElementById('btn-feed').disabled = true;
-    if (document.getElementById('btn-play')) document.getElementById('btn-play').disabled = true;
-    if (document.getElementById('btn-sleep')) document.getElementById('btn-sleep').disabled = true;
+    document.getElementById('btn-feed').disabled = true;
+    document.getElementById('btn-play').disabled = true;
+    document.getElementById('btn-sleep').disabled = true;
+    
+    // Сохраняем прогресс (питомец мертв)
+    saveGameProgress();
   }
+}
+
+function startRageCountdown() {
+  clearInterval(rageTimer);
+  rageTimer = setInterval(() => {
+    if (!pet || !pet.rageCountdownActive) {
+      clearInterval(rageTimer);
+      return;
+    }
+    
+    pet.rageCountdownTime--;
+    
+    if (document.getElementById('warning-banner')) {
+      document.getElementById('warning-banner').textContent = 
+        `⚠️ Дикий Зверь нападет через ${Math.floor(pet.rageCountdownTime / 60)} мин ${pet.rageCountdownTime % 60} сек!`;
+      document.getElementById('warning-banner').style.display = 'block';
+    }
+    
+    if (pet.rageCountdownTime <= 0) {
+      pet.endGame();
+    }
+    
+    // Сохраняем прогресс каждые 30 секунд во время отсчета
+    if (pet.rageCountdownTime % 30 === 0) {
+      saveGameProgress();
+    }
+  }, 1000);
 }
 
 const INTERFACE_METADATA = {
@@ -444,12 +792,6 @@ const INTERFACE_METADATA = {
   }
 };
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (id === 'game-screen' || id === 'shop-screen') updateUI();
-}
-
 function closeModal() {
   document.getElementById('modal').style.display = 'none';
 }
@@ -466,20 +808,24 @@ function showDangerModal(message) {
     <button onclick="closeModal()">Понятно</button>
   `;
   openModal(content);
-  
-  // Автоматически закроем через 3 секунды
   setTimeout(closeModal, 3000);
 }
 
 function applyInterfaceMetadata() {
   const meta = INTERFACE_METADATA[interfaceStyle];
   document.title = meta.title;
-  document.getElementById('main-title').textContent = meta.title;
+  if (document.getElementById('main-title')) {
+    document.getElementById('main-title').textContent = meta.title;
+  }
   document.querySelector('.decor-left').textContent = meta.decor.left;
   document.querySelector('.decor-center').textContent = meta.decor.center;
   document.querySelector('.decor-right').textContent = meta.decor.right;
-  document.querySelector('.stats-banner').textContent = meta.statsBanner;
-  document.querySelector('.footer').textContent = meta.footer;
+  if (document.querySelector('.stats-banner')) {
+    document.querySelector('.stats-banner').textContent = meta.statsBanner;
+  }
+  if (document.querySelector('.footer')) {
+    document.querySelector('.footer').textContent = meta.footer;
+  }
   const bgMap = {
     new_year: 'linear-gradient(to bottom, #04101f, #0d2438)',
     halloween: 'linear-gradient(to bottom, #120818, #241020)',
@@ -490,6 +836,8 @@ function applyInterfaceMetadata() {
 
 function refreshPetTypes() {
   const select = document.getElementById('pet-type');
+  if (!select) return;
+  
   select.innerHTML = '';
   const allTypes = [...BASE_PET_TYPES];
   ADDON_PET_TYPES.forEach(type => {
@@ -524,12 +872,10 @@ function updateUI() {
     document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
     document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
 
-    // Отображаем ярость для диких зверей
     if (pet.isWildBeast) {
       document.getElementById('rage').style.display = 'block';
       document.getElementById('rage').textContent = `Ярость: ${pet.rage}/${pet.maxRage}`;
       
-      // Цвет индикатора ярости
       const ragePercent = (pet.rage / pet.maxRage) * 100;
       if (ragePercent > 70) {
         document.getElementById('rage').style.color = '#d32f2f';
@@ -539,7 +885,6 @@ function updateUI() {
         document.getElementById('rage').style.color = '#4caf50';
       }
       
-      // Показываем предупреждение если ярость высокая
       if (ragePercent > 80 && !pet.rageCountdownActive) {
         document.getElementById('warning-banner').textContent = `⚠️ ${pet.petType} становится опасным!`;
         document.getElementById('warning-banner').style.display = 'block';
@@ -556,7 +901,6 @@ function updateUI() {
     document.getElementById('btn-play').disabled = !buttonsEnabled;
     document.getElementById('btn-sleep').disabled = !buttonsEnabled;
     
-    // Обновляем кнопку зелья спокойствия в магазине
     const calmBtn = document.getElementById('btn-calm');
     if (calmBtn) {
       if (pet.isWildBeast && pet.alive && !gameEnded) {
@@ -569,13 +913,17 @@ function updateUI() {
     }
   }
 
-  // Обновляем монеты в магазине
   document.getElementById('gold').textContent = gold;
+  
+  // Обновляем отображение пользователя в меню
+  if (currentUser && document.getElementById('menu-user-info')) {
+    document.getElementById('menu-user-info').textContent = `👤 ${currentUser.username} | Монеты: ${gold} 🪙`;
+  }
 }
 
-function onFeed() { if (pet) { pet.feed(); updateUI(); } }
-function onPlay() { if (pet) { pet.play(); updateUI(); } }
-function onSleep() { if (pet) { pet.sleep(); updateUI(); } }
+function onFeed() { if (pet) { pet.feed(); updateUI(); saveGameProgress(); } }
+function onPlay() { if (pet) { pet.play(); updateUI(); saveGameProgress(); } }
+function onSleep() { if (pet) { pet.sleep(); updateUI(); saveGameProgress(); } }
 
 function buyPotion(type) {
   let cost = 0;
@@ -619,6 +967,7 @@ function buyPotion(type) {
 
   if (success) {
     updateUI();
+    saveGameProgress();
     const message = `<div class="success-message">✅ Куплено!</div>`;
     document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
     setTimeout(() => {
@@ -649,19 +998,26 @@ function createPet() {
 
   clearInterval(tickInterval);
   tickInterval = setInterval(() => {
-    if (pet) { pet.tick(); updateUI(); }
+    if (pet) { pet.tick(); updateUI(); saveGameProgress(); }
   }, 3000);
 
   clearInterval(goldInterval);
   goldInterval = setInterval(() => {
     gold += 1;
     updateUI();
+    if (currentUser) {
+      currentUser.gold = gold;
+      localStorage.setItem('tamagochi_current_user', JSON.stringify(currentUser));
+    }
   }, 5000);
 }
 
 function showCreateScreen() {
   refreshPetTypes();
   showScreen('create-screen');
+  if (currentUser) {
+    document.getElementById('create-user-info').textContent = `👤 ${currentUser.username}`;
+  }
 }
 
 function openSettings() {
@@ -717,6 +1073,7 @@ function saveAddons() {
   document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
     .forEach(cb => enabledAddonTypes.add(cb.value));
   closeModal();
+  refreshPetTypes();
 }
 
 function openInterfaceSettings() {
@@ -777,14 +1134,43 @@ function submitSecretCode() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  applyInterfaceMetadata();
-  refreshPetTypes();
-});
-
 document.getElementById('modal').onclick = function(e) {
   if (e.target === this) closeModal();
 };
+
+// Горячие клавиши для демо (для тестирования)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'F1') {
+    // Быстрая регистрация для тестирования
+    if (document.getElementById('auth-screen').classList.contains('active')) {
+      pendingEmail = 'demo@example.com';
+      verificationCode = '123456';
+      document.getElementById('verification-code-display').textContent = verificationCode;
+      currentUser = {
+        username: 'DemoUser',
+        email: 'demo@example.com',
+        gold: 100,
+        pet: null
+      };
+      localStorage.setItem('tamagochi_current_user', JSON.stringify(currentUser));
+      
+      // Создаем демо-аккаунт
+      const accounts = JSON.parse(localStorage.getItem('tamagochi_accounts') || '{}');
+      accounts['DemoUser'] = {
+        email: 'demo@example.com',
+        password: 'demo123',
+        created: new Date().toISOString(),
+        gold: 100,
+        pet: null
+      };
+      localStorage.setItem('tamagochi_accounts', JSON.stringify(accounts));
+      
+      updateUserDisplays();
+      showScreen('main-menu');
+      alert('Демо-аккаунт создан! Ник: DemoUser, Пароль: demo123');
+    }
+  }
+});
 </script>
 
 </body>
