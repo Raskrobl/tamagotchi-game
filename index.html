@@ -47,8 +47,7 @@
       margin: 10px 0 16px;
       color: #56ccf2;
     }
-    p {
-      text-align: center;
+    p {      text-align: center;
       margin: 0 0 20px;
       color: #a0c4e0;
     }
@@ -97,8 +96,7 @@
     }
     .actions button {
       flex: 1;
-      font-size: 14px;
-      padding: 12px;
+      font-size: 14px;      padding: 12px;
     }
     .footer {
       text-align: center;
@@ -147,6 +145,203 @@
       align-items: center;
       margin: 8px 0;
       cursor: pointer;
+    }    .modal-content input[type="radio"] {
+      width: auto;
+      margin: 0 10px 0 0;
+      cursor: pointer;
+    }
+    .success-message {
+      background: #2e7d32;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .danger-message {
+      background: #d32f2f;
+      color: white;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    #rage {
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+    .warning-banner {
+      background: #ff9800;
+      color: #000;
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .stats-item {
+      background: rgba(20, 40, 60, 0.6);
+      padding: 10px;
+      border-radius: 6px;
+      margin: 8px 0;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<div class="decor-bar">
+  Понял проблему! Длинный инлайн-код в кнопке "Назад" вызывает ошибки. Вот исправленный код:
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Новогодний тамагочи</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: linear-gradient(to bottom, #04101f, #0d2438);
+      color: #f4fbff;
+      min-height: 100vh;
+      padding: 10px;
+    }
+    .decor-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .screen {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(13, 36, 56, 0.7);
+      border-radius: 12px;
+      display: none;
+    }
+    .screen.active {
+      display: block;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+      color: #e63946;
+    }
+    h2 {
+      text-align: center;
+      margin: 10px 0 16px;
+      color: #56ccf2;    }
+    p {
+      text-align: center;
+      margin: 0 0 20px;
+      color: #a0c4e0;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: #56ccf2;
+      color: #0d2438;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+    button.grayed {
+      background: #666;
+      cursor: not-allowed;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0 12px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #0b1b2b;
+      color: #f4fbff;
+      font-size: 16px;
+    }
+    .stats-banner {
+      text-align: center;
+      font-style: italic;
+      color: #a0e0ff;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .actions {
+      display: flex;
+      gap: 6px;
+      margin: 16px 0;
+    }
+    .actions button {      flex: 1;
+      font-size: 14px;
+      padding: 12px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #88b0d0;
+      margin-top: 6px;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #0d2438;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .checkbox-list {
+      text-align: left;
+      margin: 10px 0;
+    }
+    .checkbox-list label {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    .checkbox-list input[type="checkbox"] {
+      width: auto;
+      margin: 0 10px 0 0;
+      cursor: pointer;
+    }
+    .checkbox-list input[type="radio"] {
+      width: auto;
+      margin: 0 10px 0 0;
+      cursor: pointer;
+    }
+    .modal-content label {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;      cursor: pointer;
     }
     .modal-content input[type="radio"] {
       width: auto;
@@ -185,10 +380,16 @@
       margin: 10px 0;
       font-weight: bold;
     }
+    .stats-item {
+      background: rgba(20, 40, 60, 0.6);
+      padding: 10px;
+      border-radius: 6px;
+      margin: 8px 0;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
-
 <div class="decor-bar">
   <span class="decor-left">❆</span>
   <span class="decor-center">Зимняя сказка</span>
@@ -204,6 +405,7 @@
   <button onclick="showCredits()">Создатели</button>
   <button onclick="openInterfaceSettings()">Интерфейс</button>
   <button onclick="openSecretMenu()">Подарки</button>
+  <button onclick="showStats()">Статистика</button>
 </div>
 
 <div id="create-screen" class="screen">
@@ -230,15 +432,14 @@
     <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
   </div>
   <button onclick="showScreen('shop-screen')">Магазин</button>
-  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); clearInterval(rageTimer); pet = null; gold = 0;">Назад</button>
+  <button onclick="goBackToMenu()">Назад</button>
   <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
 </div>
 
 <div id="shop-screen" class="screen">
   <h2>Магазин чудес</h2>
   <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
-  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
-  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
+  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
   <button onclick="buyPotion('strength')">Зелье силы — 40 🪙<br><small>+50 ко всем статам</small></button>
   <button id="btn-calm" onclick="buyPotion('calm')">Зелье спокойствия — 20 🪙<br><small>Снижает ярость на 50 (только для Диких Зверей)</small></button>
   <button onclick="showScreen('game-screen')">Назад в игру</button>
@@ -265,6 +466,7 @@ const SECRET_PET = "Панда (SECRET)";
 const MEGA_SECRET_PET = "Леопард (MEGASECRET)";
 const WILD_BEASTS = new Set([MEGA_SECRET_PET]); // Множество диких зверей
 
+// Глобальные переменные
 let pet = null;
 let enabledAddonTypes = new Set();
 let interfaceStyle = "new_year";
@@ -279,12 +481,74 @@ let satietyPotionTimer = null;
 let rageTimer = null;
 let gameEnded = false;
 
+// Статистика (загружаем из localStorage при старте)
+let totalEarnedGold = 0;
+let ownedPets = new Set();
+let gameTimeSeconds = 0;
+let gameTimerInterval = null;
+
+// Загрузка данных из localStorage при старте
+function loadStatsFromStorage() {  try {
+    const saved = localStorage.getItem('tamagochiStats');
+    if (saved) {
+      const data = JSON.parse(saved);
+      totalEarnedGold = data.totalEarnedGold || 0;
+      gameTimeSeconds = data.gameTimeSeconds || 0;
+      if (data.ownedPets && Array.isArray(data.ownedPets)) {
+        ownedPets = new Set(data.ownedPets);
+      }
+      secretUnlocked = data.secretUnlocked || false;
+      megaSecretUnlocked = data.megaSecretUnlocked || false;
+      
+      // Загружаем настройки интерфейса
+      if (data.interfaceStyle) interfaceStyle = data.interfaceStyle;
+      if (data.enabledAddonTypes && Array.isArray(data.enabledAddonTypes)) {
+        enabledAddonTypes = new Set(data.enabledAddonTypes);
+      }
+    }
+  } catch (e) {
+    console.error("Ошибка загрузки сохранения:", e);
+    // Если ошибка - сбрасываем сохранение
+    localStorage.removeItem('tamagochiStats');
+  }
+}
+
+// Сохранение данных в localStorage
+function saveStatsToStorage() {
+  try {
+    const data = {
+      totalEarnedGold,
+      gameTimeSeconds,
+      ownedPets: Array.from(ownedPets),
+      secretUnlocked,
+      megaSecretUnlocked,
+      interfaceStyle,
+      enabledAddonTypes: Array.from(enabledAddonTypes)
+    };
+    localStorage.setItem('tamagochiStats', JSON.stringify(data));
+  } catch (e) {
+    console.error("Ошибка сохранения:", e);
+  }
+}
+
+// Функция возврата в главное меню
+function goBackToMenu() {
+  showScreen('main-menu');
+  clearInterval(tickInterval);
+  clearInterval(goldInterval);
+  clearInterval(rageTimer);
+  clearInterval(gameTimerInterval);  gameTimerInterval = null;
+  pet = null;
+  gold = 0;
+  saveStatsToStorage();
+}
+
 class Pet {
   constructor(name, petType) {
     this.name = name;
     this.petType = petType;
     this.isWildBeast = WILD_BEASTS.has(petType); // Флаг дикого зверя
-    
+
     // Для диких зверей статы 300, для обычных - 100
     this.maxStat = this.isWildBeast ? 300 : 100;
     this.hunger = this.maxStat;
@@ -300,16 +564,16 @@ class Pet {
     this.hunger = Math.max(0, Math.min(this.maxStat, this.hunger));
     this.happiness = Math.max(0, Math.min(this.maxStat, this.happiness));
     this.energy = Math.max(0, Math.min(this.maxStat, this.energy));
-    
+
     if (this.isWildBeast && this.rage !== null) {
       this.rage = Math.max(0, Math.min(this.maxStat, this.rage));
-      
+
       // Проверка на максимальную ярость
       if (this.rage >= this.maxStat && !this.rageCountdownActive) {
         this.triggerRageCountdown();
       }
     }
-    
+
     if (this.hunger === 0) this.alive = false;
   }
 
@@ -322,7 +586,6 @@ class Pet {
     }
     this._clampStats();
   }
-
   play() {
     if (!this.alive || gameEnded) return;
     this.happiness += 15;
@@ -346,17 +609,17 @@ class Pet {
 
   tick() {
     if (!this.alive || gameEnded) return;
-    
+
     if (!satietyPotionActive) {
       this.hunger -= 3;
     }
     this.happiness -= 1;
     this.energy -= 1;
-    
+
     if (this.isWildBeast) {
       this.rage += 2; // Ярость растет со временем
     }
-    
+
     this._clampStats();
   }
 
@@ -372,8 +635,7 @@ class Pet {
 
   boostAll() {
     this.hunger = Math.min(this.maxStat, this.hunger + 50);
-    this.happiness = Math.min(this.maxStat, this.happiness + 50);
-    this.energy = Math.min(this.maxStat, this.energy + 50);
+    this.happiness = Math.min(this.maxStat, this.happiness + 50);    this.energy = Math.min(this.maxStat, this.energy + 50);
     this.alive = true;
     this._clampStats();
   }
@@ -388,22 +650,22 @@ class Pet {
   triggerRageCountdown() {
     this.rageCountdownActive = true;
     this.rageCountdownTime = 300; // 5 минут = 300 секунд
-    
+
     // Показываем предупреждение
     showDangerModal("Вас съедает Дикий Зверь!");
-    
+
     // Начинаем отсчет
     clearInterval(rageTimer);
     rageTimer = setInterval(() => {
       this.rageCountdownTime--;
-      
+
       // Обновляем предупреждение
       if (document.getElementById('warning-banner')) {
         document.getElementById('warning-banner').textContent = 
           `⚠️ Дикий Зверь нападет через ${Math.ceil(this.rageCountdownTime / 60)} мин ${this.rageCountdownTime % 60} сек!`;
         document.getElementById('warning-banner').style.display = 'block';
       }
-      
+
       if (this.rageCountdownTime <= 0) {
         this.endGame();
       }
@@ -414,7 +676,7 @@ class Pet {
     clearInterval(rageTimer);
     gameEnded = true;
     showDangerModal(`Вас съел ${this.petType}!`);
-    
+
     // Отключаем все кнопки
     if (document.getElementById('btn-feed')) document.getElementById('btn-feed').disabled = true;
     if (document.getElementById('btn-play')) document.getElementById('btn-play').disabled = true;
@@ -422,8 +684,7 @@ class Pet {
   }
 }
 
-const INTERFACE_METADATA = {
-  new_year: {
+const INTERFACE_METADATA = {  new_year: {
     title: "Новогодний тамагочи",
     decor: { left: "❆", center: "Зимняя сказка", right: "❆" },
     statsBanner: "Тёплая забота согреет даже в самый снежный день",
@@ -465,30 +726,35 @@ function showDangerModal(message) {
     <button onclick="closeModal()">Понятно</button>
   `;
   openModal(content);
-  
+
   // Автоматически закроем через 3 секунды
   setTimeout(closeModal, 3000);
 }
 
 function applyInterfaceMetadata() {
   const meta = INTERFACE_METADATA[interfaceStyle];
-  document.title = meta.title;
-  document.getElementById('main-title').textContent = meta.title;
+  document.title = meta.title;  document.getElementById('main-title').textContent = meta.title;
   document.querySelector('.decor-left').textContent = meta.decor.left;
   document.querySelector('.decor-center').textContent = meta.decor.center;
   document.querySelector('.decor-right').textContent = meta.decor.right;
-  document.querySelector('.stats-banner').textContent = meta.statsBanner;
-  document.querySelector('.footer').textContent = meta.footer;
   const bgMap = {
     new_year: 'linear-gradient(to bottom, #04101f, #0d2438)',
     halloween: 'linear-gradient(to bottom, #120818, #241020)',
     holiday: 'linear-gradient(to bottom, #021b21, #062b35)'
   };
   document.body.style.background = bgMap[interfaceStyle];
+  
+  // Обновляем баннеры и футер если они видны
+  const statsBanner = document.querySelector('.stats-banner');
+  const footer = document.querySelector('.footer');
+  if (statsBanner) statsBanner.textContent = meta.statsBanner;
+  if (footer) footer.textContent = meta.footer;
 }
 
 function refreshPetTypes() {
   const select = document.getElementById('pet-type');
+  if (!select) return;
+  
   select.innerHTML = '';
   const allTypes = [...BASE_PET_TYPES];
   ADDON_PET_TYPES.forEach(type => {
@@ -510,51 +776,71 @@ function refreshPetTypes() {
 
 function updateUI() {
   if (!pet) {
-    document.getElementById('pet-info').textContent = "Питомец ещё не создан.";
-    document.getElementById('hunger').textContent = "Сытость: -";
-    document.getElementById('happiness').textContent = "Счастье: -";
-    document.getElementById('energy').textContent = "Энергия: -";
-    document.getElementById('rage').style.display = 'none';
-    document.getElementById('warning-banner').style.display = 'none';
+    const petInfo = document.getElementById('pet-info');
+    const hunger = document.getElementById('hunger');
+    const happiness = document.getElementById('happiness');
+    const energy = document.getElementById('energy');
+    const rage = document.getElementById('rage');
+    const warning = document.getElementById('warning-banner');
+        if (petInfo) petInfo.textContent = "Питомец ещё не создан.";
+    if (hunger) hunger.textContent = "Сытость: -";
+    if (happiness) happiness.textContent = "Счастье: -";
+    if (energy) energy.textContent = "Энергия: -";
+    if (rage) rage.style.display = 'none';
+    if (warning) warning.style.display = 'none';
   } else {
     const status = pet.alive ? "живой" : "мертв";
-    document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
-    document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
-    document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
-    document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
+    const petInfo = document.getElementById('pet-info');
+    const hunger = document.getElementById('hunger');
+    const happiness = document.getElementById('happiness');
+    const energy = document.getElementById('energy');
+    const rage = document.getElementById('rage');
+    const warning = document.getElementById('warning-banner');
+    
+    if (petInfo) petInfo.textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
+    if (hunger) hunger.textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
+    if (happiness) happiness.textContent = `Счастье: ${pet.happiness}`;
+    if (energy) energy.textContent = `Энергия: ${pet.energy}`;
 
     // Отображаем ярость для диких зверей
     if (pet.isWildBeast) {
-      document.getElementById('rage').style.display = 'block';
-      document.getElementById('rage').textContent = `Ярость: ${pet.rage}/${pet.maxStat}`;
-      
-      // Цвет индикатора ярости
-      const ragePercent = (pet.rage / pet.maxStat) * 100;
-      if (ragePercent > 70) {
-        document.getElementById('rage').style.color = '#d32f2f';
-      } else if (ragePercent > 40) {
-        document.getElementById('rage').style.color = '#ff9800';
-      } else {
-        document.getElementById('rage').style.color = '#4caf50';
+      if (rage) {
+        rage.style.display = 'block';
+        rage.textContent = `Ярость: ${pet.rage}/${pet.maxStat}`;
+
+        // Цвет индикатора ярости
+        const ragePercent = (pet.rage / pet.maxStat) * 100;
+        if (ragePercent > 70) {
+          rage.style.color = '#d32f2f';
+        } else if (ragePercent > 40) {
+          rage.style.color = '#ff9800';
+        } else {
+          rage.style.color = '#4caf50';
+        }
       }
-      
+
       // Показываем предупреждение если ярость высокая
       if (ragePercent > 80 && !pet.rageCountdownActive) {
-        document.getElementById('warning-banner').textContent = `⚠️ ${pet.petType} становится опасным!`;
-        document.getElementById('warning-banner').style.display = 'block';
+        if (warning) {
+          warning.textContent = `⚠️ ${pet.petType} становится опасным!`;
+          warning.style.display = 'block';
+        }
       } else if (!pet.rageCountdownActive) {
-        document.getElementById('warning-banner').style.display = 'none';
+        if (warning) warning.style.display = 'none';
       }
     } else {
-      document.getElementById('rage').style.display = 'none';
-      document.getElementById('warning-banner').style.display = 'none';
+      if (rage) rage.style.display = 'none';
+      if (warning) warning.style.display = 'none';
     }
-
     const buttonsEnabled = pet.alive && !gameEnded;
-    document.getElementById('btn-feed').disabled = !buttonsEnabled;
-    document.getElementById('btn-play').disabled = !buttonsEnabled;
-    document.getElementById('btn-sleep').disabled = !buttonsEnabled;
+    const btnFeed = document.getElementById('btn-feed');
+    const btnPlay = document.getElementById('btn-play');
+    const btnSleep = document.getElementById('btn-sleep');
     
+    if (btnFeed) btnFeed.disabled = !buttonsEnabled;
+    if (btnPlay) btnPlay.disabled = !buttonsEnabled;
+    if (btnSleep) btnSleep.disabled = !buttonsEnabled;
+
     // Обновляем кнопку зелья спокойствия в магазине
     const calmBtn = document.getElementById('btn-calm');
     if (calmBtn) {
@@ -569,7 +855,8 @@ function updateUI() {
   }
 
   // Обновляем монеты в магазине
-  document.getElementById('gold').textContent = gold;
+  const goldEl = document.getElementById('gold');
+  if (goldEl) goldEl.textContent = gold;
 }
 
 function onFeed() { if (pet) { pet.feed(); updateUI(); } }
@@ -593,8 +880,7 @@ function buyPotion(type) {
       gold -= cost;
       satietyPotionActive = true;
       success = true;
-      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);
-      satietyPotionTimer = setTimeout(() => {
+      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);      satietyPotionTimer = setTimeout(() => {
         satietyPotionActive = false;
         satietyPotionTimer = null;
         updateUI();
@@ -619,11 +905,14 @@ function buyPotion(type) {
   if (success) {
     updateUI();
     const message = `<div class="success-message">✅ Куплено!</div>`;
-    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
-    setTimeout(() => {
-      const msg = document.querySelector('.success-message');
-      if (msg) msg.remove();
-    }, 2000);
+    const modalContent = document.getElementById('modal-content');
+    if (modalContent) {
+      modalContent.insertAdjacentHTML('beforeend', message);
+      setTimeout(() => {
+        const msg = document.querySelector('.success-message');
+        if (msg) msg.remove();
+      }, 2000);
+    }
   } else {
     if (type === 'calm' && pet && !pet.isWildBeast) {
       alert("Зелье спокойствия работает только на Диких Зверях!");
@@ -634,8 +923,13 @@ function buyPotion(type) {
 }
 
 function createPet() {
-  const name = document.getElementById('pet-name').value.trim() || "Питомец";
-  const type = document.getElementById('pet-type').value;
+  const nameInput = document.getElementById('pet-name');
+  if (!nameInput) return;
+  
+  const name = nameInput.value.trim() || "Питомец";
+  const typeSelect = document.getElementById('pet-type');
+  if (!typeSelect) return;
+    const type = typeSelect.value;
   pet = new Pet(name, type);
   gameEnded = false;
   satietyPotionActive = false;
@@ -643,6 +937,11 @@ function createPet() {
     clearTimeout(satietyPotionTimer);
     satietyPotionTimer = null;
   }
+  
+  // Сохраняем питомца в статистику
+  ownedPets.add(pet.petType);
+  saveStatsToStorage();
+  
   updateUI();
   showScreen('game-screen');
 
@@ -654,8 +953,18 @@ function createPet() {
   clearInterval(goldInterval);
   goldInterval = setInterval(() => {
     gold += 1;
+    totalEarnedGold += 1; // Увеличиваем общее количество заработанных монет
+    saveStatsToStorage(); // Сохраняем
     updateUI();
   }, 5000);
+  
+  // Запускаем таймер игрового времени
+  if (!gameTimerInterval) {
+    gameTimerInterval = setInterval(() => {
+      gameTimeSeconds++;
+      saveStatsToStorage(); // Сохраняем каждую секунду
+    }, 1000);
+  }
 }
 
 function showCreateScreen() {
@@ -669,8 +978,7 @@ function openSettings() {
     <h3>Настройки</h3>
     <p>Тема игры:</p>
     <label>
-      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>
-      Тёмная
+      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>      Тёмная
     </label>
     <label>
       <input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}>
@@ -684,7 +992,12 @@ function openSettings() {
 
 function saveSettings() {
   const radios = document.getElementsByName('theme');
-  for (let radio of radios) if (radio.checked) theme = radio.value;
+  for (let radio of radios) {
+    if (radio.checked) {
+      theme = radio.value;
+      break;
+    }
+  }
   closeModal();
 }
 
@@ -713,8 +1026,10 @@ function openAddons() {
 
 function saveAddons() {
   enabledAddonTypes.clear();
-  document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
-    .forEach(cb => enabledAddonTypes.add(cb.value));
+  const checkboxes = document.querySelectorAll('#modal-content input[type="checkbox"]:checked');
+  checkboxes.forEach(cb => {    enabledAddonTypes.add(cb.value);
+  });
+  saveStatsToStorage(); // Сохраняем
   closeModal();
 }
 
@@ -742,8 +1057,14 @@ function openInterfaceSettings() {
 
 function saveInterface() {
   const radios = document.getElementsByName('iface');
-  for (let radio of radios) if (radio.checked) interfaceStyle = radio.value;
+  for (let radio of radios) {
+    if (radio.checked) {
+      interfaceStyle = radio.value;
+      break;
+    }
+  }
   applyInterfaceMetadata();
+  saveStatsToStorage(); // Сохраняем
   closeModal();
 }
 
@@ -755,28 +1076,89 @@ function openSecretMenu() {
     <br><br>
     <button onclick="submitSecretCode()">Применить</button>
     <button onclick="closeModal()">Отмена</button>
-  `;
-  openModal(content);
+  `;  openModal(content);
 }
 
 function submitSecretCode() {
-  const code = document.getElementById('secret-code').value.trim();
+  const codeInput = document.getElementById('secret-code');
+  if (!codeInput) return;
+  
+  const code = codeInput.value.trim();
   if (code === "1x1x1") {
     secretUnlocked = true;
+    saveStatsToStorage(); // Сохраняем
     const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;
-    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+    const modalContent = document.getElementById('modal-content');
+    if (modalContent) {
+      modalContent.insertAdjacentHTML('beforeend', message);
+    }
     refreshPetTypes();
   } else if (code === "Вкаминевшестьутра") {
     megaSecretUnlocked = true;
+    saveStatsToStorage(); // Сохраняем
     const message = `<div class="success-message">✅ MEGASECRET животное «${MEGA_SECRET_PET}» добавлено!</div>`;
-    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+    const modalContent = document.getElementById('modal-content');
+    if (modalContent) {
+      modalContent.insertAdjacentHTML('beforeend', message);
+    }
     refreshPetTypes();
   } else {
     alert("Неверный код! Попробуйте ещё раз.");
   }
 }
 
+// Функция отображения статистики
+function showStats() {
+  const minutes = Math.floor(gameTimeSeconds / 60);
+  const seconds = gameTimeSeconds % 60;
+  const timeStr = `${minutes} мин ${seconds} сек`;
+  
+  const petsList = ownedPets.size > 0
+    ? Array.from(ownedPets).map(p => `- ${p}`).join('<br>')
+    : 'Еще не было питомцев';
+
+  const content = `
+    <h3>📊 Ваша статистика</h3>
+    <div class="stats-item">
+      <strong>💰 Всего заработано монет:</strong><br>
+      ${totalEarnedGold} 🪙
+    </div>
+    <div class="stats-item">
+      <strong>⏱️ Время в игре:</strong><br>
+      ${timeStr}    </div>
+    <div class="stats-item">
+      <strong>🐾 Ваши питомцы:</strong><br>
+      ${petsList}
+    </div>
+    <br>
+    <button onclick="resetStats()">Сбросить статистику</button>
+    <button onclick="closeModal()">Закрыть</button>
+  `;
+  openModal(content);
+}
+
+// Функция сброса статистики
+function resetStats() {
+  if (confirm("Вы уверены, что хотите сбросить всю статистику? Это действие нельзя отменить!")) {
+    totalEarnedGold = 0;
+    ownedPets = new Set();
+    gameTimeSeconds = 0;
+    secretUnlocked = false;
+    megaSecretUnlocked = false;
+    enabledAddonTypes = new Set();
+    interfaceStyle = "new_year";
+    saveStatsToStorage();
+    closeModal();
+    alert("Статистика успешно сброшена!");
+    refreshPetTypes();
+    applyInterfaceMetadata();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Загружаем сохраненные данные
+  loadStatsFromStorage();
+  
   applyInterfaceMetadata();
   refreshPetTypes();
 });
