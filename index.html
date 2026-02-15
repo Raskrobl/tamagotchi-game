@@ -1,604 +1,3900 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Новогодний тамагочи</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      background: linear-gradient(to bottom, #04101f, #0d2438);
-      color: #f4fbff;
-      min-height: 100vh;
-      padding: 10px;
-    }
-    .decor-bar {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 12px;
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    .screen {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 20px;
-      background: rgba(13, 36, 56, 0.7);
-      border-radius: 12px;
-      display: none;
-    }
-    .screen.active {
-      display: block;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 10px;
-      color: #e63946;
-    }
-    h2 {
-      text-align: center;
-      margin: 10px 0 16px;
-      color: #56ccf2;
-    }
-    p {
-      text-align: center;
-      margin: 0 0 20px;
-      color: #a0c4e0;
-    }
-    button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-      background: #56ccf2;
-      color: #0d2438;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:disabled {
-      background: #444;
-      cursor: not-allowed;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0 12px;
-      border-radius: 4px;
-      border: 1px solid #444;
-      background: #0b1b2b;
-      color: #f4fbff;
-      font-size: 16px;
-    }
-    .stats-banner {
-      text-align: center;
-      font-style: italic;
-      color: #a0e0ff;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    .actions {
-      display: flex;
-      gap: 6px;
-      margin: 16px 0;
-    }
-    .actions button {
-      flex: 1;
-      font-size: 14px;
-      padding: 12px;
-    }
-    .footer {
-      text-align: center;
-      font-size: 13px;
-      color: #88b0d0;
-      margin-top: 6px;
-    }
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: #0d2438;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-    }
-    .checkbox-list {
-      text-align: left;
-      margin: 10px 0;
-    }
-    .checkbox-list label {
-      display: flex;
-      align-items: center;
-      margin: 8px 0;
-      cursor: pointer;
-    }
-    .checkbox-list input[type="checkbox"] {
-      width: auto;
-      margin: 0 10px 0 0;
-      cursor: pointer;
-    }
-    .checkbox-list input[type="radio"] {
-      width: auto;
-      margin: 0 10px 0 0;
-      cursor: pointer;
-    }
-    .modal-content label {
-      display: flex;
-      align-items: center;
-      margin: 8px 0;
-      cursor: pointer;
-    }
-    .modal-content input[type="radio"] {
-      width: auto;
-      margin: 0 10px 0 0;
-      cursor: pointer;
-    }
-    .success-message {
-      background: #2e7d32;
-      color: white;
-      padding: 10px;
-      border-radius: 6px;
-      text-align: center;
-      margin: 10px 0;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
+< !DOCTYPE
+html >
+< html
+lang = "ru" >
+< head >
+< meta
+charset = "UTF-8" / >
+< meta
+name = "viewport"
+content = "width=device-width, initial-scale=1.0" / >
+< title > Новогодний
+тамагочи < / title >
 
-<div class="decor-bar">
-  <span class="decor-left">❆</span>
-  <span class="decor-center">Зимняя сказка</span>
-  <span class="decor-right">❆</span>
-</div>
+< !-- Firebase
+SDK -->
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" > < / script >
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" > < / script >
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" > < / script >
 
-<div id="main-menu" class="screen active">
-  <h1 id="main-title">Новогодний тамагочи</h1>
-  <p id="main-subtitle">Нажмите "Играть", чтобы создать своего питомца!</p>
-  <button onclick="showCreateScreen()">Играть</button>
-  <button onclick="openSettings()">Настройки</button>
-  <button onclick="openAddons()">Дополнения</button>
-  <button onclick="showCredits()">Создатели</button>
-  <button onclick="openInterfaceSettings()">Интерфейс</button>
-  <button onclick="openSecretMenu()">Подарки</button>
-</div>
-
-<div id="create-screen" class="screen">
-  <h2>Создание питомца</h2>
-  <label>Имя питомца:</label>
-  <input type="text" id="pet-name" maxlength="20" placeholder="Питомец" />
-  <label>Тип питомца:</label>
-  <select id="pet-type"></select>
-  <button onclick="createPet()">Создать</button>
-  <button onclick="showScreen('main-menu')">Назад</button>
-</div>
-
-<div id="game-screen" class="screen">
-  <div class="stats-banner">Тёплая забота согреет даже в самый снежный день</div>
-  <div id="pet-info">Питомец ещё не создан.</div>
-  <div id="hunger">Сытость: -</div>
-  <div id="happiness">Счастье: -</div>
-  <div id="energy">Энергия: -</div>
-  <div class="actions">
-    <button id="btn-feed" onclick="onFeed()" disabled>Кормить</button>
-    <button id="btn-play" onclick="onPlay()" disabled>Играть</button>
-    <button id="btn-sleep" onclick="onSleep()" disabled>Спать</button>
-  </div>
-  <button onclick="showScreen('shop-screen')">Магазин</button>
-  <button onclick="showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); pet = null; gold = 0;">Назад</button>
-  <div class="footer">Кормите, играйте и укладывайте спать – и питомец будет счастлив</div>
-</div>
-
-<div id="shop-screen" class="screen">
-  <h2>Магазин чудес</h2>
-  <p>Ваши монеты: <span id="gold">0</span> 🪙</p>
-  <button onclick="buyPotion('revive')">Зелье здоровья — 50 🪙<br><small>Оживляет мёртвого питомца</small></button>
-  <button onclick="buyPotion('satiety')">Зелье сытости — 30 🪙<br><small>Питомец сыт 5 минут</small></button>
-  <button onclick="buyPotion('strength')">Зелье силы — 40 🪙<br><small>+50 ко всем статам</small></button>
-  <button onclick="showScreen('game-screen')">Назад в игру</button>
-</div>
-
-<div id="modal" class="modal">
-  <div class="modal-content" id="modal-content"></div>
-</div>
-
-<script>
-const BASE_PET_TYPES = ["Собака", "Кошка", "Попугай"];
-const ADDON_PET_TYPES = [
-  "Арангутант",
-  "Черепаха",
-  "Одиндиндун",
-  "Пчела",
-  "бр бр бр бр патапим",
-  "gramma",
-  "maddung",
-  "Didiblat(NEW)",
-  "Корова(NEW)"
-];
-const SECRET_PET = "Панда (SECRET)";
-let pet = null;
-let enabledAddonTypes = new Set();
-let interfaceStyle = "new_year";
-let theme = "dark";
-let tickInterval = null;
-let secretUnlocked = false;
-let gold = 0;
-let goldInterval = null;
-let satietyPotionActive = false;
-let satietyPotionTimer = null;
-
-class Pet {
-  constructor(name, petType) {
-    this.name = name;
-    this.petType = petType;
-    this.hunger = 100;
-    this.happiness = 100;
-    this.energy = 100;
-    this.alive = true;
-  }
-
-  _clampStats() {
-    this.hunger = Math.max(0, Math.min(100, this.hunger));
-    this.happiness = Math.max(0, Math.min(100, this.happiness));
-    this.energy = Math.max(0, Math.min(100, this.energy));
-    if (this.hunger === 0) this.alive = false;
-  }
-
-  feed() {
-    if (!this.alive) return;
-    this.hunger += 20;
-    this.energy += 5;
-    this._clampStats();
-  }
-
-  play() {
-    if (!this.alive) return;
-    this.happiness += 15;
-    this.hunger -= 10;
-    this.energy -= 10;
-    this._clampStats();
-  }
-
-  sleep() {
-    if (!this.alive) return;
-    this.energy += 25;
-    this.hunger -= 5;
-    this._clampStats();
-  }
-
-  tick() {
-    if (!this.alive) return;
-    if (!satietyPotionActive) {
-      this.hunger -= 3;
-    }
-    this.happiness -= 1;
-    this.energy -= 1;
-    this._clampStats();
-  }
-
-  revive() {
-    if (!this.alive) {
-      this.alive = true;
-      this.hunger = 50;
-      this.happiness = 50;
-      this.energy = 50;
-      this._clampStats();
-    }
-  }
-
-  boostAll() {
-    this.hunger = Math.min(100, this.hunger + 50);
-    this.happiness = Math.min(100, this.happiness + 50);
-    this.energy = Math.min(100, this.energy + 50);
-    this.alive = true;
-    this._clampStats();
-  }
+< style >
+*{
+    box - sizing: border - box;
+margin: 0;
+padding: 0;
+font - family: "Segoe UI", Tahoma, Geneva, Verdana, sans - serif;
+}
+body
+{
+    background: linear - gradient(to bottom,  # 04101f, #0d2438);
+color:  # f4fbff;
+min - height: 100
+vh;
+padding: 10
+px;
+}
+.decor - bar
+{
+    display: flex;
+justify - content: space - between;
+padding: 8
+px
+12
+px;
+font - size: 18
+px;
+margin - bottom: 15
+px;
+}
+.screen
+{
+    max - width: 520px;
+margin: 0
+auto;
+padding: 20
+px;
+background: rgba(13, 36, 56, 0.7);
+border - radius: 12
+px;
+display: none;
+}
+.screen.active
+{
+    display: block;
+}
+h1
+{
+    font - size: 22px;
+font - weight: bold;
+text - align: center;
+margin - bottom: 10
+px;
+color:  # e63946;
+}    h2
+{
+    text - align: center;
+margin: 10
+px
+0
+16
+px;
+color:  # 56ccf2;
+}
+p
+{
+    text - align: center;
+margin: 0
+0
+20
+px;
+color:  # a0c4e0;
+}
+button
+{
+    display: block;
+width: 100 %;
+padding: 10
+px;
+margin: 5
+px
+0;
+background:  # 56ccf2;
+color:  # 0d2438;
+border: none;
+border - radius: 6
+px;
+font - weight: bold;
+font - size: 16
+px;
+cursor: pointer;
+}
+button: disabled
+{
+    background:  # 444;
+        cursor: not -allowed;
+}
+button.grayed
+{
+    background:  # 666;
+        cursor: not -allowed;
+}
+button.auth
+{
+    background:  # 4361ee;
+}
+button.danger
+{
+    background:  # ef233c;
+}
+button.google
+{
+    background:  # db4437;
+}
+button.loading
+{
+    background:  # 6c757d;
+        cursor: wait;
+}
+input, select
+{
+    width: 100 %;
+padding: 8
+px;
+margin: 6
+px
+0
+12
+px;
+border - radius: 4
+px;
+border: 1
+px
+solid  # 444;      background: #0b1b2b;
+color:  # f4fbff;
+font - size: 16
+px;
+}
+.stats - banner
+{
+    text - align: center;
+font - style: italic;
+color:  # a0e0ff;
+margin - bottom: 8
+px;
+font - size: 14
+px;
+}
+.actions
+{
+    display: flex;
+gap: 6
+px;
+margin: 16
+px
+0;
+}
+.actions
+button
+{
+    flex: 1;
+font - size: 14
+px;
+padding: 12
+px;
+}
+.footer
+{
+    text - align: center;
+font - size: 13
+px;
+color:  # 88b0d0;
+margin - top: 6
+px;
+}
+.modal
+{
+    position: fixed;
+top: 0;
+left: 0;
+width: 100 %;
+height: 100 %;
+background: rgba(0, 0, 0, 0.8);
+display: none;
+justify - content: center;
+align - items: center;
+}
+.modal - content
+{
+    background:  # 0d2438;
+        padding: 20
+px;
+border - radius: 10
+px;
+width: 90 %;
+max - width: 400
+px;
+}
+.checkbox - list
+{
+apiKey: "AIzaSyCcjVPt9obaweeOqr1NKEdcT7U7SaltFkA",
+  authDomain: "tamagochi-d4cf8.firebaseapp.com",
+  projectId: "tamagochi-d4cf8",
+  storageBucket: "tamagochi-d4cf8.firebasestorage.app",
+  messagingSenderId: "696665660103",
+  appId: "1:696665660103:web:05b40d31213
+}
+.checkbox - list
+label
+{
+    display: flex;
+align - items: center;
+margin: 8
+px
+0;
+cursor: pointer;
+}
+.checkbox - list
+input[type = "checkbox"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.checkbox - list
+input[type = "radio"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.modal - content
+label
+{
+    display: flex;
+align - items: center;
+margin: 8
+px
+0;
+cursor: pointer;
+}
+.modal - content
+input[type = "radio"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.success - message
+{
+    background:  # 2e7d32;
+        color: white;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+}
+.danger - message
+{
+    background:  # d32f2f;
+        color: white;
+padding: 15
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+font - size: 18
+px;
+}
+# rage {
+color:  # ff6b6b;
+font - weight: bold;
+}
+.warning - banner
+{
+    background:  # ff9800;
+        color:  # 000;      padding: 8px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+}
+.user - info
+{
+    text - align: center;
+margin - bottom: 15
+px;
+font - size: 16
+px;
+color:  # 56ccf2;
+}
+.auth - note
+{
+    background:  # 1a3a52;
+        padding: 12
+px;
+border - radius: 6
+px;
+margin: 10
+px
+0;
+font - size: 13
+px;
+text - align: center;
+}
+.firebase - notice
+{
+    background:  # 4361ee;
+        color: white;
+padding: 15
+px;
+border - radius: 8
+px;
+margin: 15
+px
+0;
+text - align: left;
+font - size: 14
+px;
+}
+.firebase - notice
+strong
+{
+    color:  # ffcc00;
+}
+.email - verified
+{
+    background:  # 2e7d32;
+        color: white;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+display: none;
+}
+.email -
+not -verified
+{
+    background:  # ff9800;
+        color:  # 000;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+display: none;
+}.loading - spinner
+{
+    border: 3px solid  # 333;
+    border - top: 3px solid  # 56ccf2;
+    border - radius: 50 %;
+width: 30
+px;
+height: 30
+px;
+animation: spin
+1
+s
+linear
+infinite;
+margin: 20
+px
+auto;
+display: none;
 }
 
-const INTERFACE_METADATA = {
-  new_year: {
-    title: "Новогодний тамагочи",
-    decor: { left: "❆", center: "Зимняя сказка", right: "❆" },
-    statsBanner: "Тёплая забота согреет даже в самый снежный день",
-    footer: "Кормите, играйте и укладывайте спать – и питомец будет счастлив"
-  },
-  halloween: {
-    title: "Хелуинский тамагочи",
-    decor: { left: "[ ]", center: "Ночь Хелуина", right: "[ ]" },
-    statsBanner: "Следи за настроением своего таинственного питомца",
-    footer: "Кормите, играйте и отдыхайте, чтобы прогнать тьму"
-  },
-  holiday: {
-    title: "Праздничный тамагочи",
-    decor: { left: "* *", center: "Праздничное настроение", right: "* *" },
-    statsBanner: "Пусть праздник продолжается – береги силы и радость питомца",
-    footer: "Игры и угощения делают праздник ярче"
-  }
+@keyframes
+
+
+spin
+{
+    0 % {transform: rotate(0deg);}
+100 % {transform: rotate(360deg);}
+}
+.divider
+{
+    text - align: center;
+margin: 15
+px
+0;
+color:  # 666;
+position: relative;
+}
+.divider::before
+{
+    content: "или";
+background:  # 0d2438;
+padding: 0
+10
+px;
+position: relative;
+z - index: 1;
+}
+.divider::after
+{
+    content: "";
+position: absolute;
+top: 50 %;
+left: 0;
+right: 0;
+border - top: 1
+px
+solid  # 444;
+z - index: 0;
+}
+< / style >
+< / head >
+< body >
+
+< div
+
+
+class ="decor-bar" >
+
+< span
+
+
+class ="decor-left" > ❆ < / span >
+
+< span
+
+
+class ="decor-center" > Зимняя сказка < / span >
+
+< span
+
+
+class ="decor-right" > ❆ < / span >
+
+< / div >
+
+< !-- Экран
+входа -->
+< div
+id = "auth-screen"
+
+
+class ="screen active" >
+
+< h1 > Новогодний
+тамагочи < / h1 >
+< div
+
+
+class ="firebase-notice" >
+
+< strong >🔥 Firebase
+Authentication < / strong > < br > < br >
+• Реальная
+отправка
+писем
+с
+подтверждением ✅ < br >
+• Безопасное
+хранение
+паролей(хеширование) 🔐 < br >
+• Прогресс
+игры
+сохраняется
+в
+облаке ☁️ < br >
+• Вход
+через
+Google
+одним
+кликом 🚀
+< / div >
+
+< h2 > Вход
+в
+аккаунт < / h2 >
+< input
+type = "email"
+id = "login-email"
+placeholder = "Email"
+required / >
+< input
+type = "password"
+id = "login-password"
+placeholder = "Пароль"
+required / >
+< div
+
+
+class ="loading-spinner" id="login-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="loginWithEmail()" > Войти < / button >
+
+< div
+
+
+class ="divider" > < / div >
+
+< button
+
+
+class ="google" onclick="loginWithGoogle()" >
+
+< i
+
+
+class ="fab fa-google" > < / i > Войти через Google
+
+< / button >
+
+< button
+onclick = "showScreen('register-screen')" > Создать
+аккаунт < / button >
+< button
+onclick = "showScreen('password-reset-screen')" > Забыли
+пароль? < / button >
+< / div >
+
+< !-- Экран
+регистрации -->
+< div
+id = "register-screen"
+
+
+class ="screen" >
+
+< h2 > Создание
+аккаунта < / h2 >
+
+< input
+type = "email"
+id = "register-email"
+placeholder = "Email"
+required / >
+< input
+type = "password"
+id = "register-password"
+placeholder = "Пароль (мин. 6 символов)"
+required / >
+< input
+type = "password"
+id = "register-confirm-password"
+placeholder = "Повторите пароль"
+required / >
+
+< div
+
+
+class ="loading-spinner" id="register-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="registerWithEmail()" > Создать аккаунт < / button >
+
+< button
+onclick = "showScreen('auth-screen')" > Уже
+есть
+аккаунт? < / button >
+< / div >
+
+< !-- Экран
+подтверждения
+почты -->
+< div
+id = "verify-email-screen"
+
+
+class ="screen" >
+
+< h2 >📧 Подтвердите
+вашу
+почту < / h2 >
+
+< div
+
+
+class ="auth-note" >
+
+
+Мы
+отправили
+письмо
+с
+ссылкой
+для
+подтверждения
+на
+ваш
+адрес. < br >
+Пожалуйста, проверьте
+почту
+и
+нажмите
+на
+ссылку.
+< / div >
+
+< div
+
+
+class ="email-not-verified" id="email-not-verified" >
+
+⚠️
+Ваш
+email
+еще
+не
+подтвержден
+< / div >
+< div
+
+
+class ="email-verified" id="email-verified" >
+
+✅ Email
+подтвержден! Добро
+пожаловать
+в
+игру!
+< / div >
+
+< div
+
+
+class ="loading-spinner" id="verify-loading" > < / div >
+
+< button
+onclick = "checkEmailVerification()" > Проверить
+подтверждение < / button >
+< button
+onclick = "sendVerificationEmail()" > Отправить
+письмо
+повторно < / button >
+< button
+
+
+class ="danger" onclick="signOut()" > Выйти < / button >
+
+< / div >
+
+< !-- Экран
+сброса
+пароля -->
+< div
+id = "password-reset-screen"
+
+
+class ="screen" >
+
+< h2 > Сброс
+пароля < / h2 >
+
+< div
+
+
+class ="auth-note" >
+
+
+Введите
+ваш
+email, и
+мы
+отправим
+инструкции
+по
+восстановлению
+пароля.
+< / div >
+
+< input
+type = "email"
+id = "reset-email"
+placeholder = "Ваш email"
+required / >
+< div
+
+
+class ="loading-spinner" id="reset-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="sendPasswordReset()" > Отправить инструкции < / button >
+
+< button
+onclick = "showScreen('auth-screen')" > Назад < / button >
+< / div >
+
+< !-- Основное
+меню
+игры -->
+< div
+id = "main-menu"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="menu-user-info" > < / div >
+
+< h1
+id = "main-title" > Новогодний
+тамагочи < / h1 >
+< p
+id = "main-subtitle" > Нажмите
+"Играть", чтобы
+создать
+своего
+питомца! < / p >
+< button
+onclick = "showCreateScreen()" > Играть < / button >
+< button
+onclick = "openSettings()" > Настройки < / button >
+< button
+onclick = "openAddons()" > Дополнения < / button >
+< button
+onclick = "showCredits()" > Создатели < / button >
+< button
+onclick = "openInterfaceSettings()" > Интерфейс < / button >
+< button
+onclick = "openSecretMenu()" > Подарки < / button >
+< button
+
+
+class ="danger" onclick="signOut()" > Выйти из аккаунта < / button >
+
+< / div >
+
+< !-- Остальные
+экраны
+игры -->
+< div
+id = "create-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="create-user-info" > < / div >
+
+< h2 > Создание
+питомца < / h2 >
+< label > Имя
+питомца: < / label >
+< input
+type = "text"
+id = "pet-name"
+maxlength = "20"
+placeholder = "Питомец" / >
+< label > Тип
+питомца: < / label >
+< select
+id = "pet-type" > < / select >
+< button
+onclick = "createPet()" > Создать < / button >
+< button
+onclick = "showScreen('main-menu')" > Назад < / button >
+< / div >
+< div
+id = "game-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="game-user-info" > < / div >
+
+< div
+
+
+class ="stats-banner" > Тёплая забота согреет даже в самый снежный день < / div >
+
+< div
+id = "pet-info" > Питомец
+ещё
+не
+создан. < / div >
+< div
+id = "hunger" > Сытость: - < / div >
+< div
+id = "happiness" > Счастье: - < / div >
+< div
+id = "energy" > Энергия: - < / div >
+< div
+id = "rage"
+style = "display:none;" > Ярость: - / 100 < / div >
+< div
+id = "warning-banner"
+
+
+class ="warning-banner" style="display:none;" > < / div >
+
+< div
+
+
+class ="actions" >
+
+< button
+id = "btn-feed"
+onclick = "onFeed()"
+disabled > Кормить < / button >
+< button
+id = "btn-play"
+onclick = "onPlay()"
+disabled > Играть < / button >
+< button
+id = "btn-sleep"
+onclick = "onSleep()"
+disabled > Спать < / button >
+< / div >
+< button
+onclick = "showScreen('shop-screen')" > Магазин < / button >
+< button
+onclick = "showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); clearInterval(rageTimer);" > Назад < / button >
+< div
+
+
+class ="footer" > Кормите, играйте и укладывайте спать – и питомец будет счастлив < / div >
+
+< / div >
+
+< div
+id = "shop-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="shop-user-info" > < / div >
+
+< h2 > Магазин
+чудес < / h2 >
+< p > Ваши
+монеты: < span
+id = "gold" > 0 < / span > 🪙 < / p >
+< button
+onclick = "buyPotion('revive')" > Зелье
+здоровья — 50 🪙 < br > < small > Оживляет
+мёртвого
+питомца < / small > < / button >
+< button
+onclick = "buyPotion('satiety')" > Зелье
+сытости — 30 🪙 < br > < small > Питомец
+сыт
+5
+минут < / small > < / button >
+< button
+onclick = "buyPotion('strength')" > Зелье
+силы — 40 🪙 < br > < small > +50
+ко
+всем
+статам < / small > < / button >
+< button
+id = "btn-calm"
+onclick = "buyPotion('calm')" > Зелье
+спокойствия — 20 🪙 < br > < small > Снижает
+ярость
+на
+50(только
+для
+Диких
+Зверей) < / small > < / button >
+< button
+onclick = "showScreen('game-screen')" > Назад
+в
+игру < / button >
+< / div >
+
+< div
+id = "modal"
+
+
+class ="modal" >
+
+< div
+
+
+class ="modal-content" id="modal-content" > < / div >
+
+< / div >
+
+< script >
+// == == == == == == == == == == == == == == == == == == == ==
+// ⚙️
+НАСТРОЙКИ
+FIREBASE(ЗАМЕНИТЕ
+НА
+СВОИ!)
+// == == == == == == == == == == == == == == == == == == == ==
+const
+firebaseConfig = {
+    apiKey: "AIzaSyCvBZ9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abcdef1234567890abcdef12"
 };
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (id === 'game-screen' || id === 'shop-screen') updateUI();
+// == == == == == == == == == == == == == == == == == == == ==
+// ИНИЦИАЛИЗАЦИЯ
+FIREBASE // == == == == == == == == == == == == == == == == == == == ==
+let
+appInitialized = false;
+let
+currentUser = null;
+let
+db = null;
+let
+auth = null;
+
+function
+initializeFirebase()
+{
+if (appInitialized)
+return;
+
+try {
+// Проверяем, введены ли настоящие ключи
+if (firebaseConfig.apiKey == = "AIzaSyCvBZ9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9") {
+alert("⚠️ ВНИМАНИЕ!\n\nВы используете демо-ключи Firebase. Для работы приложения:\n\n1. Перейдите на https://console.firebase.google.com\n2. Создайте новый проект\n3. Перейдите в \"Настройки проекта\" → \"Ваши приложения\"\n4. Добавьте веб-приложение и скопируйте конфиг\n5. Вставьте конфиг в строки 220-227 этого файла");
+showFirebaseInstructions();
+return;
 }
 
-function closeModal() {
-  document.getElementById('modal').style.display = 'none';
+// Инициализация
+Firebase
+firebase.initializeApp(firebaseConfig);
+auth = firebase.auth();
+db = firebase.firestore();
+
+appInitialized = true;
+console.log("✅ Firebase успешно инициализирован");
+
+// Слушатель
+состояния
+аутентификации
+auth.onAuthStateChanged(user= > {
+if (user)
+{
+    currentUser = user;
+console.log("✅ Пользователь вошел:", user.email);
+
+// Проверяем
+подтверждение
+почты
+if (!user.emailVerified)
+{
+    showScreen('verify-email-screen');
+document.getElementById('email-not-verified').style.display = 'block';
+document.getElementById('email-verified').style.display = 'none';
+} else {
+       // Загружаем
+прогресс
+игры
+loadGameProgress();
+updateUserDisplays();
+showScreen('main-menu');
+}
+} else {
+    currentUser = null;
+showScreen('auth-screen');
+}
+});
+
+} catch(error)
+{
+    console.error("❌ Ошибка инициализации Firebase:", error);
+alert(`Ошибка
+инициализации
+Firebase:\n${error.message}\n\nПроверьте
+консоль
+браузера(F12)
+для
+подробностей.
+`);
+}
 }
 
-function openModal(content) {
-  document.getElementById('modal-content').innerHTML = content;
-  document.getElementById('modal').style.display = 'flex';
+// == == == == == == == == == == == == == == == == == == == ==
+// ФУНКЦИИ
+АВТОРИЗАЦИИ
+// == == == == == == == == == == == == == == == == == == == ==
+function
+showScreen(id)
+{
+    document.querySelectorAll('.screen').forEach(el= > el.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+
+// Очистка
+полей
+при
+переключении
+if (id === 'register-screen')
+{
+    document.getElementById('register-email').value = '';
+document.getElementById('register-password').value = '';
+document.getElementById('register-confirm-password').value = '';
+document.getElementById('register-loading').style.display = 'none';
+} else if (id === 'auth-screen') {
+document.getElementById('login-email').value = '';
+document.getElementById('login-password').value = '';
+document.getElementById('login-loading').style.display = 'none';
+} else if (id == = 'password-reset-screen') {
+document.getElementById('reset-email').value = '';
+document.getElementById('reset-loading').style.display = 'none';
+}
 }
 
-function applyInterfaceMetadata() {
-  const meta = INTERFACE_METADATA[interfaceStyle];
-  document.title = meta.title;
-  document.getElementById('main-title').textContent = meta.title;
-  document.querySelector('.decor-left').textContent = meta.decor.left;
-  document.querySelector('.decor-center').textContent = meta.decor.center;
-  document.querySelector('.decor-right').textContent = meta.decor.right;
-  document.querySelector('.stats-banner').textContent = meta.statsBanner;
-  document.querySelector('.footer').textContent = meta.footer;
-  const bgMap = {
+function updateUserDisplays() {
+if (!currentUser)
+return;
+
+const
+displayName = currentUser.displayName | | currentUser.email.split('@')[0];
+const
+emailVerified = currentUser.emailVerified ? ' ✅': ' ⚠️';
+
+document.querySelectorAll('.user-info').forEach(el= > {
+    el.textContent = `👤 ${displayName}${emailVerified}
+`;
+});
+}
+
+// Регистрация
+по
+почте
+async function
+registerWithEmail()
+{
+const
+email = document.getElementById('register-email').value.trim();
+const
+password = document.getElementById('register-password').value;
+const
+confirmPassword = document.getElementById('register-confirm-password').value;
+
+// Валидация
+if (!email | | !email.includes('@')) {
+alert('Введите корректный email!');
+return;
+}
+if (password.length < 6) {
+alert('Пароль должен быть не менее 6 символов!');
+return;
+}
+
+if (password !== confirmPassword) {
+alert('Пароли не совпадают!');
+return;
+}
+
+// Инициализируем
+Firebase
+initializeFirebase();
+if (!appInitialized)
+return;
+
+// Показываем
+спиннер
+const
+loadingSpinner = document.getElementById('register-loading');
+loadingSpinner.style.display = 'block';
+const
+registerBtn = event.target;
+registerBtn.disabled = true;
+
+try {
+// Создаем пользователя
+const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+const user = userCredential.user;
+
+// Отправляем письмо с подтверждением
+await user.sendEmailVerification();
+
+loadingSpinner.style.display = 'none';
+registerBtn.disabled = false;
+
+// Показываем экран подтверждения
+showScreen('verify-email-screen');
+document.getElementById('email-not-verified').style.display = 'block';
+
+alert(`✅ Аккаунт создан!\nМы отправили письмо с подтверждением на ${email}.\nПроверьте почту и нажмите на ссылку.`);
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+registerBtn.disabled = false;
+
+let errorMessage = 'Ошибка регистрации: ';
+switch (error.code) {
+case 'auth/email-already-in-use':
+    errorMessage = 'Этот email уже зарегистрирован!';
+break;
+case
+'auth/invalid-email':
+errorMessage = 'Неверный формат email!';
+break;
+case
+'auth/weak-password': errorMessage = 'Пароль слишком слабый (минимум 6 символов)!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка регистрации:', error);
+}
+}
+
+// Вход
+по
+почте
+async function
+loginWithEmail()
+{
+    const
+email = document.getElementById('login-email').value.trim();
+const
+password = document.getElementById('login-password').value;
+
+if (!email | | !password)
+{
+    alert('Введите email и пароль!');
+return;
+}
+
+initializeFirebase();
+if (!appInitialized)
+return;
+
+const
+loadingSpinner = document.getElementById('login-loading');
+loadingSpinner.style.display = 'block';
+const
+loginBtn = event.target;
+loginBtn.disabled = true;
+
+try {
+await auth.signInWithEmailAndPassword(email, password);
+
+loadingSpinner.style.display = 'none';
+loginBtn.disabled = false;
+
+// Пользователь автоматически перейдет на нужный экран через onAuthStateChanged
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+loginBtn.disabled = false;
+
+let errorMessage = 'Ошибка входа: ';
+switch (error.code) {
+case 'auth/user-not-found':
+    errorMessage = 'Пользователь с таким email не найден!';
+break;
+case
+'auth/wrong-password':
+errorMessage = 'Неверный пароль!';
+break;
+case
+'auth/invalid-email': errorMessage = 'Неверный формат email!';
+break;
+case
+'auth/user-disabled':
+errorMessage = 'Аккаунт заблокирован!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка входа:', error);
+}
+}
+
+// Вход
+через
+Google
+async function
+loginWithGoogle()
+{
+    initializeFirebase();
+if (!appInitialized)
+return;
+
+const
+provider = new
+firebase.auth.GoogleAuthProvider();
+
+try {
+await auth.signInWithPopup(provider);
+// Пользователь автоматически перейдет на нужный экран
+
+} catch (error) {
+if (error.code != = 'auth/popup-closed-by-user') {
+alert(`Ошибка входа через Google: $
+    {error.message}
+`);
+console.error('Ошибка входа через Google:', error);
+}
+}
+}
+
+// Отправка
+письма
+с
+подтверждением
+async function
+sendVerificationEmail()
+{
+if (!currentUser) {
+alert('Вы не авторизованы!');
+return;
+}
+
+const
+loadingSpinner = document.getElementById('verify-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await currentUser.sendEmailVerification();
+
+loadingSpinner.style.display = 'none';
+alert(`✅ Письмо отправлено на ${currentUser.email}!\nПроверьте почту.`);
+
+} catch (error) {loadingSpinner.style.display = 'none';
+alert(`Ошибка отправки: $
+    {error.message}
+`);
+console.error('Ошибка отправки письма:', error);
+}
+}
+
+// Проверка
+подтверждения
+почты
+async function
+checkEmailVerification()
+{
+if (!currentUser) return;
+
+const
+loadingSpinner = document.getElementById('verify-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await currentUser.reload();
+
+loadingSpinner.style.display = 'none';
+
+if (currentUser.emailVerified) {
+document.getElementById('email-not-verified').style.display = 'none';
+document.getElementById('email-verified').style.display = 'block';
+
+// Загружаем прогресс игры
+await loadGameProgress();
+updateUserDisplays();
+showScreen('main-menu');
+
+showSuccessModal('🎉 Добро пожаловать в игру!');
+} else {
+alert('Email еще не подтвержден. Проверьте почту и нажмите на ссылку.');
+}
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+alert(`Ошибка проверки: $
+    {error.message}
+`);
+console.error('Ошибка проверки почты:', error);
+}
+}
+
+// Сброс
+пароля
+async function
+sendPasswordReset()
+{
+const
+email = document.getElementById('reset-email').value.trim();
+
+if (!email | | !email.includes('@')) {
+alert('Введите корректный email!');
+return;
+}
+
+initializeFirebase();
+if (!appInitialized)
+return;
+const
+loadingSpinner = document.getElementById('reset-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await auth.sendPasswordResetEmail(email);
+
+loadingSpinner.style.display = 'none';
+alert(`✅ Инструкции по восстановлению пароля отправлены на ${email}!\nПроверьте почту.`);
+showScreen('auth-screen');
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+
+let errorMessage = 'Ошибка отправки: ';
+switch (error.code) {
+case 'auth/user-not-found':
+    errorMessage = 'Пользователь с таким email не найден!';
+break;
+case
+'auth/invalid-email':
+errorMessage = 'Неверный формат email!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка сброса пароля:', error);
+}
+}
+
+// Выход
+из
+аккаунта
+async function
+signOut()
+{
+if (!auth)
+{
+    showScreen('auth-screen');
+return;
+}
+
+try {
+// Сохраняем прогресс перед выходом
+await saveGameProgress();
+
+await auth.signOut();
+currentUser = null;
+gold = 0;
+pet = null;
+clearInterval(tickInterval);
+clearInterval(goldInterval);
+clearInterval(rageTimer);
+showScreen('auth-screen');
+
+} catch (error) {
+alert(`Ошибка выхода: $
+    {error.message}
+`);
+console.error('Ошибка выхода:', error);
+}
+}
+
+// == == == == == == == == == == == == == == == == == == == ==
+// СОХРАНЕНИЕ
+И
+ЗАГРУЗКА
+ПРОГРЕССА
+ИГРЫ
+// == == == == == == == == == == == == == == == == == == == ==
+async function
+saveGameProgress()
+{
+if (!currentUser | | !db) return;
+
+try {
+const userDoc = db.collection('users').doc(currentUser.uid);
+
+const data = {
+gold: gold,
+lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+};
+
+if (pet) {
+data.pet = {
+name: pet.name,
+petType: pet.petType,
+hunger: pet.hunger,
+happiness: pet.happiness,
+energy: pet.energy,
+rage: pet.rage,
+alive: pet.alive,
+isWildBeast: pet.isWildBeast,
+maxStat: pet.maxStat,
+rageCountdownActive: pet.rageCountdownActive,
+rageCountdownTime: pet.rageCountdownTime
+};
+} else {
+    data.pet = null;
+}
+
+await userDoc.set(data, {merge: true});
+console.log('✅ Прогресс сохранен');
+
+} catch(error)
+{
+    console.error('❌ Ошибка сохранения прогресса:', error);
+}
+}
+
+async function
+loadGameProgress()
+{
+if (!currentUser | | !db) return;
+try {
+const userDoc = await db.collection('users').doc(currentUser.uid).get();
+
+if (userDoc.exists) {
+const data = userDoc.data();
+
+gold = data.gold | | 0;
+
+if (data.pet) {
+const savedPet = data.pet;
+pet = new Pet(savedPet.name, savedPet.petType);
+pet.hunger = savedPet.hunger;
+pet.happiness = savedPet.happiness;
+pet.energy = savedPet.energy;
+pet.alive = savedPet.alive;
+
+if (savedPet.isWildBeast) {
+pet.rage = savedPet.rage | | 0;
+pet.rageCountdownActive = savedPet.rageCountdownActive | | false;
+pet.rageCountdownTime = savedPet.rageCountdownTime | | 0;
+
+if (pet.rageCountdownActive) {
+startRageCountdown();
+}
+}
+
+// Возобновляем таймеры игры
+clearInterval(tickInterval);
+tickInterval = setInterval(() = > {
+if (pet) {pet.tick(); updateUI();}
+}, 3000);
+
+clearInterval(goldInterval);
+goldInterval = setInterval(() = > {
+gold += 1;
+updateUI();
+}, 5000);
+}
+
+updateUI();
+console.log('✅ Прогресс загружен');
+}
+
+} catch (error) {
+console.error('❌ Ошибка загрузки прогресса:', error);
+}
+}
+
+function
+showSuccessModal(message)
+{const
+content = `
+< div
+
+
+class ="success-message" > ${message} < / div >
+
+< br >
+< button
+onclick = "closeModal()" > OK < / button >
+Отлично! Вот
+полная
+версия
+игры
+с
+интеграцией ** Firebase
+Authentication ** — это
+безопасное, надежное
+решение
+с
+реальной
+отправкой
+писем
+и
+сохранением
+данных
+в
+облаке!
+
+---
+
+## 🎮 ПОЛНЫЙ КОД ИГРЫ СО ВСТРОЕННОЙ АВТОРИЗАЦИЕЙ
+
+```html
+< !DOCTYPE
+html >
+< html
+lang = "ru" >
+< head >
+< meta
+charset = "UTF-8" / >
+< meta
+name = "viewport"
+content = "width=device-width, initial-scale=1.0" / >
+< title > Новогодний
+тамагочи < / title >
+
+< !-- Firebase
+SDK -->
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" > < / script >
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" > < / script >
+< script
+src = "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" > < / script >
+
+< style >
+*{
+    box - sizing: border - box;
+margin: 0;
+padding: 0;
+font - family: "Segoe UI", Tahoma, Geneva, Verdana, sans - serif;
+}
+body
+{
+    background: linear - gradient(to bottom,  # 04101f, #0d2438);
+color:  # f4fbff;
+min - height: 100
+vh;
+padding: 10
+px;
+}
+.decor - bar
+{
+    display: flex;
+justify - content: space - between;
+padding: 8
+px
+12
+px;
+font - size: 18
+px;
+margin - bottom: 15
+px;
+}
+.screen
+{
+    max - width: 520px;
+margin: 0
+auto;
+padding: 20
+px;
+background: rgba(13, 36, 56, 0.7);
+border - radius: 12
+px;
+display: none;}
+.screen.active
+{
+    display: block;
+}
+h1
+{
+    font - size: 22px;
+font - weight: bold;
+text - align: center;
+margin - bottom: 10
+px;
+color:  # e63946;
+}
+h2
+{
+    text - align: center;
+margin: 10
+px
+0
+16
+px;
+color:  # 56ccf2;
+}
+p
+{
+    text - align: center;
+margin: 0
+0
+20
+px;
+color:  # a0c4e0;
+}
+button
+{
+    display: block;
+width: 100 %;
+padding: 10
+px;
+margin: 5
+px
+0;
+background:  # 56ccf2;
+color:  # 0d2438;
+border: none;
+border - radius: 6
+px;
+font - weight: bold;
+font - size: 16
+px;
+cursor: pointer;
+}
+button: disabled
+{
+    background:  # 444;
+        cursor: not -allowed;
+}
+button.grayed
+{
+    background:  # 666;
+        cursor: not -allowed;
+}
+button.auth
+{
+    background:  # 4361ee;
+}
+button.danger
+{
+    background:  # ef233c;
+}
+button.google
+{
+    background:  # db4437;    }
+        button.loading {
+    background:  # 6c757d;
+        cursor: wait;
+}
+input, select
+{
+    width: 100 %;
+padding: 8
+px;
+margin: 6
+px
+0
+12
+px;
+border - radius: 4
+px;
+border: 1
+px
+solid  # 444;
+background:  # 0b1b2b;
+color:  # f4fbff;
+font - size: 16
+px;
+}
+.stats - banner
+{
+    text - align: center;
+font - style: italic;
+color:  # a0e0ff;
+margin - bottom: 8
+px;
+font - size: 14
+px;
+}
+.actions
+{
+    display: flex;
+gap: 6
+px;
+margin: 16
+px
+0;
+}
+.actions
+button
+{
+    flex: 1;
+font - size: 14
+px;
+padding: 12
+px;
+}
+.footer
+{
+    text - align: center;
+font - size: 13
+px;
+color:  # 88b0d0;
+margin - top: 6
+px;
+}
+.modal
+{
+    position: fixed;
+top: 0;
+left: 0;
+width: 100 %;
+height: 100 %;
+background: rgba(0, 0, 0, 0.8);
+display: none;
+justify - content: center;
+align - items: center;
+}
+.modal - content
+{
+    background:  # 0d2438;
+        padding: 20
+px;
+border - radius: 10
+px;
+width: 90 %;
+max - width: 400
+px;
+}
+.checkbox - list
+{
+    text - align: left;
+margin: 10
+px
+0;
+}
+.checkbox - list
+label
+{
+    display: flex;
+align - items: center;
+margin: 8
+px
+0;
+cursor: pointer;
+}
+.checkbox - list
+input[type = "checkbox"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.checkbox - list
+input[type = "radio"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.modal - content
+label
+{
+    display: flex;
+align - items: center;
+margin: 8
+px
+0;
+cursor: pointer;
+}
+.modal - content
+input[type = "radio"] {
+    width: auto;
+margin: 0
+10
+px
+0
+0;
+cursor: pointer;
+}
+.success - message
+{
+    background:  # 2e7d32;
+        color: white;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+}
+.danger - message
+{
+    background:  # d32f2f;
+        color: white;
+padding: 15
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+font - size: 18
+px;
+}
+# rage {
+color:  # ff6b6b;
+font - weight: bold;
+}
+.warning - banner
+{
+    background:  # ff9800;
+        color:  # 000;
+padding: 8
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+font - weight: bold;
+}
+.user - info
+{
+    text - align: center;
+margin - bottom: 15
+px;
+font - size: 16
+px;
+color:  # 56ccf2;
+}
+.auth - note
+{
+    background:  # 1a3a52;
+        padding: 12
+px;
+border - radius: 6
+px;
+margin: 10
+px
+0;
+font - size: 13
+px;
+text - align: center;
+}
+.firebase - notice
+{
+    background:  # 4361ee;
+        color: white;
+padding: 15
+px;
+border - radius: 8
+px;
+margin: 15
+px
+0;
+text - align: left;
+font - size: 14
+px;
+}
+.firebase - notice
+strong
+{
+    color:  # ffcc00;
+}
+.email - verified
+{
+    background:  # 2e7d32;
+        color: white;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+display: none;
+}
+.email -
+not -verified
+{
+    background:  # ff9800;
+        color:  # 000;
+padding: 10
+px;
+border - radius: 6
+px;
+text - align: center;
+margin: 10
+px
+0;
+display: none;
+}
+.loading - spinner
+{
+    border: 3px solid  # 333;
+    border - top: 3px solid  # 56ccf2;
+    border - radius: 50 %;
+width: 30
+px;
+height: 30
+px;
+animation: spin
+1
+s
+linear
+infinite;
+margin: 20
+px
+auto;
+display: none;
+}
+
+@keyframes
+
+
+spin
+{
+    0 % {transform: rotate(0deg);}
+100 % {transform: rotate(360deg);}
+}
+.divider
+{
+    text - align: center;
+margin: 15
+px
+0;
+color:  # 666;
+position: relative;
+}
+.divider::before
+{
+    content: "или";
+background:  # 0d2438;
+padding: 0
+10
+px;
+position: relative;
+z - index: 1;
+}
+.divider::after
+{
+    content: "";
+position: absolute;
+top: 50 %;
+left: 0;
+right: 0;
+border - top: 1
+px
+solid  # 444;
+z - index: 0;
+}
+< / style >
+    < / head >
+        < body >
+        < div
+
+
+class ="decor-bar" >
+
+< span
+
+
+class ="decor-left" > ❆ < / span >
+
+< span
+
+
+class ="decor-center" > Зимняя сказка < / span >
+
+< span
+
+
+class ="decor-right" > ❆ < / span >
+
+< / div >
+
+< !-- Экран
+входа -->
+< div
+id = "auth-screen"
+
+
+class ="screen active" >
+
+< h1 > Новогодний
+тамагочи < / h1 >
+
+< div
+
+
+class ="firebase-notice" >
+
+< strong >🔥 Firebase
+Authentication < / strong > < br > < br >
+• Реальная
+отправка
+писем
+с
+подтверждением ✅ < br >
+• Безопасное
+хранение
+паролей(хеширование) 🔐 < br >
+• Прогресс
+игры
+сохраняется
+в
+облаке ☁️ < br >
+• Вход
+через
+Google
+одним
+кликом 🚀
+< / div >
+
+< h2 > Вход
+в
+аккаунт < / h2 >
+< input
+type = "email"
+id = "login-email"
+placeholder = "Email"
+required / >
+< input
+type = "password"
+id = "login-password"
+placeholder = "Пароль"
+required / >
+< div
+
+
+class ="loading-spinner" id="login-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="loginWithEmail()" > Войти < / button >
+
+< div
+
+
+class ="divider" > < / div >
+
+< button
+
+
+class ="google" onclick="loginWithGoogle()" >
+
+< i
+
+
+class ="fab fa-google" > < / i > Войти через Google
+
+< / button >
+
+< button
+onclick = "showScreen('register-screen')" > Создать
+аккаунт < / button >
+< button
+onclick = "showScreen('password-reset-screen')" > Забыли
+пароль? < / button >
+< / div >
+
+< !-- Экран
+регистрации -->
+< div
+id = "register-screen"
+
+
+class ="screen" >
+
+< h2 > Создание
+аккаунта < / h2 >
+
+< input
+type = "email"
+id = "register-email"
+placeholder = "Email"
+required / >
+< input
+type = "password"
+id = "register-password"
+placeholder = "Пароль (мин. 6 символов)"
+required / >
+< input
+type = "password"
+id = "register-confirm-password"
+placeholder = "Повторите пароль"
+required / >
+
+< div
+
+
+class ="loading-spinner" id="register-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="registerWithEmail()" > Создать аккаунт < / button >
+
+< button
+onclick = "showScreen('auth-screen')" > Уже
+есть
+аккаунт? < / button >
+< / div >
+
+< !-- Экран
+подтверждения
+почты -->
+< div
+id = "verify-email-screen"
+
+
+class ="screen" > < h2 > 📧 Подтвердите вашу почту < / h2 >
+
+< div
+
+
+class ="auth-note" >
+
+
+Мы
+отправили
+письмо
+с
+ссылкой
+для
+подтверждения
+на
+ваш
+адрес. < br >
+Пожалуйста, проверьте
+почту
+и
+нажмите
+на
+ссылку.
+< / div >
+
+< div
+
+
+class ="email-not-verified" id="email-not-verified" >
+
+⚠️
+Ваш
+email
+еще
+не
+подтвержден
+< / div >
+
+< div
+
+
+class ="email-verified" id="email-verified" >
+
+✅ Email
+подтвержден! Добро
+пожаловать
+в
+игру!
+< / div >
+
+< div
+
+
+class ="loading-spinner" id="verify-loading" > < / div >
+
+< button
+onclick = "checkEmailVerification()" > Проверить
+подтверждение < / button >
+< button
+onclick = "sendVerificationEmail()" > Отправить
+письмо
+повторно < / button >
+< button
+
+
+class ="danger" onclick="signOut()" > Выйти < / button >
+
+< / div >
+
+< !-- Экран
+сброса
+пароля -->
+< div
+id = "password-reset-screen"
+
+
+class ="screen" >
+
+< h2 > Сброс
+пароля < / h2 >
+
+< div
+
+
+class ="auth-note" >
+
+
+Введите
+ваш
+email, и
+мы
+отправим
+инструкции
+по
+восстановлению
+пароля.
+< / div >
+
+< input
+type = "email"
+id = "reset-email"
+placeholder = "Ваш email"
+required / >
+< div
+
+
+class ="loading-spinner" id="reset-loading" > < / div >
+
+< button
+
+
+class ="auth" onclick="sendPasswordReset()" > Отправить инструкции < / button >
+
+< button
+onclick = "showScreen('auth-screen')" > Назад < / button >
+< / div >
+
+< !-- Основное
+меню
+игры -->
+< div
+id = "main-menu"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="menu-user-info" > < / div >
+
+< h1
+id = "main-title" > Новогодний
+тамагочи < / h1 >
+< p
+id = "main-subtitle" > Нажмите
+"Играть", чтобы
+создать
+своего
+питомца! < / p >
+< button
+onclick = "showCreateScreen()" > Играть < / button >
+< button
+onclick = "openSettings()" > Настройки < / button >
+< button
+onclick = "openAddons()" > Дополнения < / button >
+< button
+onclick = "showCredits()" > Создатели < / button >
+< button
+onclick = "openInterfaceSettings()" > Интерфейс < / button >
+< button
+onclick = "openSecretMenu()" > Подарки < / button >
+< button
+
+
+class ="danger" onclick="signOut()" > Выйти из аккаунта < / button >
+
+< / div >
+< !-- Остальные
+экраны
+игры -->
+< div
+id = "create-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="create-user-info" > < / div >
+
+< h2 > Создание
+питомца < / h2 >
+< label > Имя
+питомца: < / label >
+< input
+type = "text"
+id = "pet-name"
+maxlength = "20"
+placeholder = "Питомец" / >
+< label > Тип
+питомца: < / label >
+< select
+id = "pet-type" > < / select >
+< button
+onclick = "createPet()" > Создать < / button >
+< button
+onclick = "showScreen('main-menu')" > Назад < / button >
+< / div >
+
+< div
+id = "game-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="game-user-info" > < / div >
+
+< div
+
+
+class ="stats-banner" > Тёплая забота согреет даже в самый снежный день < / div >
+
+< div
+id = "pet-info" > Питомец
+ещё
+не
+создан. < / div >
+< div
+id = "hunger" > Сытость: - < / div >
+< div
+id = "happiness" > Счастье: - < / div >
+< div
+id = "energy" > Энергия: - < / div >
+< div
+id = "rage"
+style = "display:none;" > Ярость: - / 100 < / div >
+< div
+id = "warning-banner"
+
+
+class ="warning-banner" style="display:none;" > < / div >
+
+< div
+
+
+class ="actions" >
+
+< button
+id = "btn-feed"
+onclick = "onFeed()"
+disabled > Кормить < / button >
+< button
+id = "btn-play"
+onclick = "onPlay()"
+disabled > Играть < / button >
+< button
+id = "btn-sleep"
+onclick = "onSleep()"
+disabled > Спать < / button >
+< / div >
+< button
+onclick = "showScreen('shop-screen')" > Магазин < / button >
+< button
+onclick = "showScreen('main-menu'); clearInterval(tickInterval); clearInterval(goldInterval); clearInterval(rageTimer);" > Назад < / button >
+< div
+
+
+class ="footer" > Кормите, играйте и укладывайте спать – и питомец будет счастлив < / div >
+
+< / div >
+
+< div
+id = "shop-screen"
+
+
+class ="screen" >
+
+< div
+
+
+class ="user-info" id="shop-user-info" > < / div >
+
+< h2 > Магазин
+чудес < / h2 >
+< p > Ваши
+монеты: < span
+id = "gold" > 0 < / span > 🪙 < / p >
+< button
+onclick = "buyPotion('revive')" > Зелье
+здоровья — 50 🪙 < br > < small > Оживляет
+мёртвого
+питомца < / small > < / button >
+< button
+onclick = "buyPotion('satiety')" > Зелье
+сытости — 30 🪙 < br > < small > Питомец
+сыт
+5
+минут < / small > < / button >
+< button
+onclick = "buyPotion('strength')" > Зелье
+силы — 40 🪙 < br > < small > +50
+ко
+всем
+статам < / small > < / button >
+< button
+id = "btn-calm"
+onclick = "buyPotion('calm')" > Зелье
+спокойствия — 20 🪙 < br > < small > Снижает
+ярость
+на
+50(только
+для
+Диких
+Зверей) < / small > < / button >
+< button
+onclick = "showScreen('game-screen')" > Назад
+в
+игру < / button >
+< / div >
+
+< div
+id = "modal"
+
+
+class ="modal" >
+
+< div
+
+
+class ="modal-content" id="modal-content" > < / div >
+
+< / div >
+
+< script >
+// == == == == == == == == == == == == == == == == == == == ==
+// ⚙️
+НАСТРОЙКИ
+FIREBASE(ЗАМЕНИТЕ
+НА
+СВОИ!)
+// == == == == == == == == == == == == == == == == == == == == const
+firebaseConfig = {
+    apiKey: "AIzaSyCvBZ9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abcdef1234567890abcdef12"
+};
+
+// == == == == == == == == == == == == == == == == == == == ==
+// ИНИЦИАЛИЗАЦИЯ
+FIREBASE
+// == == == == == == == == == == == == == == == == == == == ==
+let
+appInitialized = false;
+let
+currentUser = null;
+let
+db = null;
+let
+auth = null;
+
+function
+initializeFirebase()
+{
+if (appInitialized)
+return;
+
+try {
+// Проверяем, введены ли настоящие ключи
+if (firebaseConfig.apiKey == = "AIzaSyCvBZ9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9") {
+alert("⚠️ ВНИМАНИЕ!\n\nВы используете демо-ключи Firebase. Для работы приложения:\n\n1. Перейдите на https://console.firebase.google.com\n2. Создайте новый проект\n3. Перейдите в \"Настройки проекта\" → \"Ваши приложения\"\n4. Добавьте веб-приложение и скопируйте конфиг\n5. Вставьте конфиг в строки 220-227 этого файла");
+showFirebaseInstructions();
+return;
+}
+
+// Инициализация
+Firebase
+firebase.initializeApp(firebaseConfig);
+auth = firebase.auth();
+db = firebase.firestore();
+
+appInitialized = true;
+console.log("✅ Firebase успешно инициализирован");
+
+// Слушатель
+состояния
+аутентификации
+auth.onAuthStateChanged(user= > {
+if (user)
+{
+    currentUser = user;
+console.log("✅ Пользователь вошел:", user.email);
+
+// Проверяем
+подтверждение
+почты
+if (!user.emailVerified)
+{
+    showScreen('verify-email-screen');
+document.getElementById('email-not-verified').style.display = 'block';
+document.getElementById('email-verified').style.display = 'none';
+} else {
+       // Загружаем
+прогресс
+игры
+loadGameProgress();
+updateUserDisplays();
+showScreen('main-menu');
+}
+} else {
+    currentUser = null;
+showScreen('auth-screen');
+}
+});
+
+} catch(error)
+{
+    console.error("❌ Ошибка инициализации Firebase:", error);
+alert(`Ошибка
+инициализации
+Firebase:\n${error.message}\n\nПроверьте
+консоль
+браузера(F12)
+для
+подробностей.
+`);
+}
+}
+
+// == == == == == == == == == == == == == == == == == == == ==
+// ФУНКЦИИ
+АВТОРИЗАЦИИ
+// == == == == == == == == == == == == == == == == == == == ==
+function
+showScreen(id)
+{
+    document.querySelectorAll('.screen').forEach(el= > el.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+
+// Очистка
+полей
+при
+переключении
+if (id === 'register-screen')
+{
+    document.getElementById('register-email').value = '';
+document.getElementById('register-password').value = '';
+document.getElementById('register-confirm-password').value = '';
+document.getElementById('register-loading').style.display = 'none';
+} else if (id === 'auth-screen') {
+document.getElementById('login-email').value = '';
+document.getElementById('login-password').value = '';
+document.getElementById('login-loading').style.display = 'none';
+} else if (id == = 'password-reset-screen') {
+document.getElementById('reset-email').value = '';
+document.getElementById('reset-loading').style.display = 'none';
+}
+}
+
+function updateUserDisplays() {
+if (!currentUser)
+return;
+
+const
+displayName = currentUser.displayName | | currentUser.email.split('@')[0];
+const
+emailVerified = currentUser.emailVerified ? ' ✅': ' ⚠️';
+
+document.querySelectorAll('.user-info').forEach(el= > {
+    el.textContent = `👤 ${displayName}${emailVerified}
+`;
+});
+}
+
+// Регистрация
+по
+почтеasync
+function
+registerWithEmail()
+{
+const
+email = document.getElementById('register-email').value.trim();
+const
+password = document.getElementById('register-password').value;
+const
+confirmPassword = document.getElementById('register-confirm-password').value;
+
+// Валидация
+if (!email | | !email.includes('@')) {
+alert('Введите корректный email!');
+return;
+}
+
+if (password.length < 6) {
+alert('Пароль должен быть не менее 6 символов!');
+return;
+}
+
+if (password !== confirmPassword) {
+alert('Пароли не совпадают!');
+return;
+}
+
+// Инициализируем
+Firebase
+initializeFirebase();
+if (!appInitialized)
+return;
+
+// Показываем
+спиннер
+const
+loadingSpinner = document.getElementById('register-loading');
+loadingSpinner.style.display = 'block';
+const
+registerBtn = event.target;
+registerBtn.disabled = true;
+
+try {
+// Создаем пользователя
+const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+const user = userCredential.user;
+
+// Отправляем письмо с подтверждением
+await user.sendEmailVerification();
+
+loadingSpinner.style.display = 'none';
+registerBtn.disabled = false;
+
+// Показываем экран подтверждения
+showScreen('verify-email-screen');
+document.getElementById('email-not-verified').style.display = 'block';
+
+alert(`✅ Аккаунт создан!\nМы отправили письмо с подтверждением на ${email}.\nПроверьте почту и нажмите на ссылку.`);
+
+} catch (error) {
+loadingSpinner.style.display = 'none';    registerBtn.disabled = false;
+
+let errorMessage = 'Ошибка регистрации: ';
+switch (error.code) {
+case 'auth/email-already-in-use':
+    errorMessage = 'Этот email уже зарегистрирован!';
+break;
+case
+'auth/invalid-email':
+errorMessage = 'Неверный формат email!';
+break;
+case
+'auth/weak-password':
+errorMessage = 'Пароль слишком слабый (минимум 6 символов)!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка регистрации:', error);
+}
+}
+
+// Вход
+по
+почте
+async function
+loginWithEmail()
+{
+    const
+email = document.getElementById('login-email').value.trim();
+const
+password = document.getElementById('login-password').value;
+
+if (!email | | !password)
+{
+    alert('Введите email и пароль!');
+return;
+}
+
+initializeFirebase();
+if (!appInitialized)
+return;
+
+const
+loadingSpinner = document.getElementById('login-loading');
+loadingSpinner.style.display = 'block';
+const
+loginBtn = event.target;
+loginBtn.disabled = true;
+
+try {
+await auth.signInWithEmailAndPassword(email, password);
+
+loadingSpinner.style.display = 'none';
+loginBtn.disabled = false;
+
+// Пользователь автоматически перейдет на нужный экран через onAuthStateChanged
+
+} catch (error) {
+loadingSpinner.style.display = 'none';    loginBtn.disabled = false;
+
+let errorMessage = 'Ошибка входа: ';
+switch (error.code) {
+case 'auth/user-not-found':
+    errorMessage = 'Пользователь с таким email не найден!';
+break;
+case
+'auth/wrong-password':
+errorMessage = 'Неверный пароль!';
+break;
+case
+'auth/invalid-email':
+errorMessage = 'Неверный формат email!';
+break;
+case
+'auth/user-disabled':
+errorMessage = 'Аккаунт заблокирован!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка входа:', error);
+}
+}
+
+// Вход
+через
+Google
+async function
+loginWithGoogle()
+{
+    initializeFirebase();
+if (!appInitialized)
+return;
+
+const
+provider = new
+firebase.auth.GoogleAuthProvider();
+
+try {
+await auth.signInWithPopup(provider);
+// Пользователь автоматически перейдет на нужный экран
+
+} catch (error) {
+if (error.code != = 'auth/popup-closed-by-user') {
+alert(`Ошибка входа через Google: $
+    {error.message}
+`);
+console.error('Ошибка входа через Google:', error);
+}
+}
+}
+
+// Отправка
+письма
+с
+подтверждением
+async function
+sendVerificationEmail()
+{
+if (!currentUser) {
+alert('Вы не авторизованы!');
+return;
+}
+const
+loadingSpinner = document.getElementById('verify-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await currentUser.sendEmailVerification();
+
+loadingSpinner.style.display = 'none';
+alert(`✅ Письмо отправлено на ${currentUser.email}!\nПроверьте почту.`);
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+alert(`Ошибка отправки: $
+    {error.message}
+`);
+console.error('Ошибка отправки письма:', error);
+}
+}
+
+// Проверка
+подтверждения
+почты
+async function
+checkEmailVerification()
+{
+if (!currentUser) return;
+
+const
+loadingSpinner = document.getElementById('verify-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await currentUser.reload();
+
+loadingSpinner.style.display = 'none';
+
+if (currentUser.emailVerified) {
+document.getElementById('email-not-verified').style.display = 'none';
+document.getElementById('email-verified').style.display = 'block';
+
+// Загружаем прогресс игры
+await loadGameProgress();
+updateUserDisplays();
+showScreen('main-menu');
+
+showSuccessModal('🎉 Добро пожаловать в игру!');
+} else {
+alert('Email еще не подтвержден. Проверьте почту и нажмите на ссылку.');
+}
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+alert(`Ошибка проверки: $
+    {error.message}
+`);
+console.error('Ошибка проверки почты:', error);
+}
+}
+// Сброс
+пароля
+async function
+sendPasswordReset()
+{
+const
+email = document.getElementById('reset-email').value.trim();
+
+if (!email | | !email.includes('@')) {
+alert('Введите корректный email!');
+return;
+}
+
+initializeFirebase();
+if (!appInitialized)
+return;
+
+const
+loadingSpinner = document.getElementById('reset-loading');
+loadingSpinner.style.display = 'block';
+
+try {
+await auth.sendPasswordResetEmail(email);
+
+loadingSpinner.style.display = 'none';
+alert(`✅ Инструкции по восстановлению пароля отправлены на ${email}!\nПроверьте почту.`);
+showScreen('auth-screen');
+
+} catch (error) {
+loadingSpinner.style.display = 'none';
+
+let errorMessage = 'Ошибка отправки: ';
+switch (error.code) {
+case 'auth/user-not-found':
+    errorMessage = 'Пользователь с таким email не найден!';
+break;
+case
+'auth/invalid-email':
+errorMessage = 'Неверный формат email!';
+break;
+default:
+errorMessage = error.message;
+}
+
+alert(errorMessage);
+console.error('Ошибка сброса пароля:', error);
+}
+}
+
+// Выход
+из
+аккаунта
+async function
+signOut()
+{
+if (!auth)
+{
+    showScreen('auth-screen');
+return;
+}
+
+try {// Сохраняем прогресс перед выходом
+await saveGameProgress();
+
+await auth.signOut();
+currentUser = null;
+gold = 0;
+pet = null;
+clearInterval(tickInterval);
+clearInterval(goldInterval);
+clearInterval(rageTimer);
+
+showScreen('auth-screen');
+
+} catch (error) {
+alert(`Ошибка выхода: $
+    {error.message}
+`);
+console.error('Ошибка выхода:', error);
+}
+}
+
+// == == == == == == == == == == == == == == == == == == == ==
+// СОХРАНЕНИЕ
+И
+ЗАГРУЗКА
+ПРОГРЕССА
+ИГРЫ
+// == == == == == == == == == == == == == == == == == == == ==
+async function
+saveGameProgress()
+{
+if (!currentUser | | !db) return;
+
+try {
+const userDoc = db.collection('users').doc(currentUser.uid);
+
+const data = {
+gold: gold,
+lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+};
+
+if (pet) {
+data.pet = {
+name: pet.name,
+petType: pet.petType,
+hunger: pet.hunger,
+happiness: pet.happiness,
+energy: pet.energy,
+rage: pet.rage,
+alive: pet.alive,
+isWildBeast: pet.isWildBeast,
+maxStat: pet.maxStat,
+rageCountdownActive: pet.rageCountdownActive,
+rageCountdownTime: pet.rageCountdownTime
+};
+} else {
+    data.pet = null;
+}
+await userDoc.set(data, {merge: true});
+console.log('✅ Прогресс сохранен');
+
+} catch(error)
+{
+    console.error('❌ Ошибка сохранения прогресса:', error);
+}
+}
+
+async function
+loadGameProgress()
+{
+if (!currentUser | | !db) return;
+
+try {
+const userDoc = await db.collection('users').doc(currentUser.uid).get();
+
+if (userDoc.exists) {
+const data = userDoc.data();
+
+gold = data.gold | | 0;
+
+if (data.pet) {
+const savedPet = data.pet;
+pet = new Pet(savedPet.name, savedPet.petType);
+pet.hunger = savedPet.hunger;
+pet.happiness = savedPet.happiness;
+pet.energy = savedPet.energy;
+pet.alive = savedPet.alive;
+
+if (savedPet.isWildBeast) {
+pet.rage = savedPet.rage | | 0;
+pet.rageCountdownActive = savedPet.rageCountdownActive | | false;
+pet.rageCountdownTime = savedPet.rageCountdownTime | | 0;
+
+if (pet.rageCountdownActive) {
+startRageCountdown();
+}
+}
+
+// Возобновляем таймеры игры
+clearInterval(tickInterval);
+tickInterval = setInterval(() = > {
+if (pet) {pet.tick(); updateUI();}
+}, 3000);
+
+clearInterval(goldInterval);
+goldInterval = setInterval(() = > {
+gold += 1;
+updateUI();
+}, 5000);
+}
+updateUI();
+console.log('✅ Прогресс загружен');
+}
+
+} catch (error) {
+console.error('❌ Ошибка загрузки прогресса:', error);
+}
+}
+
+function
+showSuccessModal(message)
+{
+const
+content = `
+< div
+
+
+class ="success-message" > ${message} < / div >
+
+< br >
+< button
+onclick = "closeModal()" > OK < / button >
+`;
+openModal(content);
+}
+
+function
+showFirebaseInstructions()
+{
+const
+content = `
+< h3 >📝 Инструкция
+по
+настройке
+Firebase < / h3 >
+< ol
+style = "text-align:left;margin:15px 0;line-height:1.6;" >
+< li > Перейдите
+на < a
+href = "https://console.firebase.google.com"
+target = "_blank"
+style = "color:#4361ee;" > Firebase
+Console < / a > < / li >
+< li > Нажмите < strong > "Добавить проект" < / strong > < / li >
+< li > Введите
+название(например, "Тамагочи")
+и
+нажмите
+"Продолжить" < / li >
+< li > Отключите
+Google
+Analytics(опционально)
+и
+нажмите
+"Создать проект" < / li >
+< li > Когда
+проект
+создан, нажмите < strong > "Настройки проекта" < / strong > (шестеренка) < / li >
+< li > Прокрутите
+вниз
+до
+раздела < strong > "Ваши приложения" < / strong > < / li >
+< li > Нажмите
+на
+иконку < strong > Web( < / strong > < / li >
+                                        < li > Введите
+имя
+приложения(например, "Тамагочи веб") < / li >
+                                         < li > Скопируйте
+объект < strong > firebaseConfig < / strong > (все строки внутри фигурных скобок) < / li >
+                                                                                      < li > Вставьте
+этот
+конфиг
+в
+код
+на
+строках
+220 - 227 < / li >
+              < li > В
+консоли
+Firebase
+перейдите
+в < strong > Authentication < / strong > → < strong > Начало
+работы < / strong > < / li >
+                        < li > Включите < strong > Email / Password < / strong > и < strong > Google < / strong > провайдеры < / li >
+                                                                                                                                 < li > В < strong > Firestore
+Database < / strong > создайте
+базу
+данных(начните
+в
+тестовом
+режиме) < / li >
+            < / ol >
+                < button
+onclick = "closeModal()" > Понятно < / button >
+                                       `;
+openModal(content);
+}
+
+// == == == == == == == == == == == == == == == == == == == ==
+// ИГРОВАЯ
+ЛОГИКА
+// == == == == == == == == == == == == == == == == == == == ==
+const
+BASE_PET_TYPES = ["Собака", "Кошка", "Попугай"];
+const
+ADDON_PET_TYPES = [
+    "Арангутант",
+    "Черепаха",
+    "Одиндиндун", "Пчела",
+    "бр бр бр бр патапим",
+    "gramma",
+    "maddung",
+    "Didiblat(NEW)",
+    "Корова(NEW)"
+];
+const
+SECRET_PET = "Панда (SECRET)";
+const
+MEGA_SECRET_PET = "Леопард (MEGASECRET)";
+const
+WILD_BEASTS = new
+Set([MEGA_SECRET_PET]);
+
+let
+pet = null;
+let
+enabledAddonTypes = new
+Set();
+let
+interfaceStyle = "new_year";
+let
+theme = "dark";
+let
+tickInterval = null;
+let
+secretUnlocked = false;
+let
+megaSecretUnlocked = false;
+let
+gold = 0;
+let
+goldInterval = null;
+let
+satietyPotionActive = false;
+let
+satietyPotionTimer = null;
+let
+rageTimer = null;
+let
+gameEnded = false;
+
+
+class Pet {
+constructor(name, petType) {
+this.name = name;
+this.petType = petType;
+this.isWildBeast = WILD_BEASTS.has(petType);
+
+this.maxStat = this.isWildBeast ? 300: 100;
+this.hunger = this.maxStat;
+this.happiness = this.maxStat;
+this.energy = this.maxStat;
+this.rage = this.isWildBeast
+
+? 0: null;
+this.maxRage = 100;
+this.alive = true;
+this.rageCountdownActive = false;
+this.rageCountdownTime = 0;
+}
+
+_clampStats()
+{
+    this.hunger = Math.max(0, Math.min(this.maxStat, this.hunger));
+this.happiness = Math.max(0, Math.min(this.maxStat, this.happiness));
+this.energy = Math.max(0, Math.min(this.maxStat, this.energy));
+
+if (this.isWildBeast & & this.rage !== null)
+{
+    this.rage = Math.max(0, Math.min(this.maxRage, this.rage));
+if (this.rage >= this.maxRage & & !this.rageCountdownActive)
+{
+    this.triggerRageCountdown();
+}
+}
+
+if (this.hunger === 0) this.alive = false;
+}
+
+feed() {
+if (!this.alive | | gameEnded)
+return;
+this.hunger += 20;
+this.energy += 5;
+if (this.isWildBeast) {
+this.rage = Math.max(0, this.rage - 10);
+}
+this._clampStats();
+}
+
+play()
+{
+if (!this.alive | | gameEnded) return;
+this.happiness += 15;
+this.hunger -= 10;
+this.energy -= 10;
+if (this.isWildBeast) {
+this.rage += 8;
+}
+this._clampStats();
+}
+
+sleep()
+{
+if (!this.alive | | gameEnded) return;
+this.energy += 25;
+this.hunger -= 5;
+if (this.isWildBeast) {
+this.rage = Math.max(0, this.rage - 15);
+}
+this._clampStats();
+}
+
+tick()
+{
+if (!this.alive | | gameEnded) return;
+
+if (!satietyPotionActive) {
+this.hunger -= 3;
+}
+this.happiness -= 1;
+this.energy -= 1;
+
+if (this.isWildBeast) {
+this.rage += 3;}
+
+this._clampStats();
+}
+
+revive()
+{
+if (!this.alive) {
+this.alive = true;
+this.hunger = Math.floor(this.maxStat / 2);
+this.happiness = Math.floor(this.maxStat / 2);
+this.energy = Math.floor(this.maxStat / 2);
+this._clampStats();
+}
+}
+
+boostAll()
+{
+this.hunger = Math.min(this.maxStat, this.hunger + 50);
+this.happiness = Math.min(this.maxStat, this.happiness + 50);
+this.energy = Math.min(this.maxStat, this.energy + 50);
+this.alive = true;
+this._clampStats();
+}
+
+calmDown(amount=50)
+{
+if (!this.isWildBeast | | !this.alive | | gameEnded) return false;
+this.rage = Math.max(0, this.rage - amount);
+this._clampStats();
+return true;
+}
+
+triggerRageCountdown()
+{
+this.rageCountdownActive = true;
+this.rageCountdownTime = 300;
+
+showDangerModal("Вас съедает Дикий Зверь!");
+startRageCountdown();
+}
+
+endGame()
+{
+clearInterval(rageTimer);
+gameEnded = true;
+showDangerModal(`Вас
+съел ${this.petType}!`);
+
+document.getElementById('btn-feed').disabled = true;
+document.getElementById('btn-play').disabled = true;
+document.getElementById('btn-sleep').disabled = true;
+
+saveGameProgress();
+}
+}
+function
+startRageCountdown()
+{
+    clearInterval(rageTimer);
+rageTimer = setInterval(() = > {
+if (!pet | | !pet.rageCountdownActive)
+{
+    clearInterval(rageTimer);
+return;
+}
+
+pet.rageCountdownTime - -;
+
+if (document.getElementById('warning-banner'))
+{
+document.getElementById('warning-banner').textContent =
+`⚠️
+Дикий
+Зверь
+нападет
+через ${Math.floor(pet.rageCountdownTime / 60)}
+мин ${pet.rageCountdownTime % 60}
+сек!`;
+document.getElementById('warning-banner').style.display = 'block';
+}
+
+if (pet.rageCountdownTime <= 0) {
+pet.endGame();
+}
+
+if (pet.rageCountdownTime % 30 === 0) {
+saveGameProgress();
+}
+}, 1000);
+}
+
+const
+INTERFACE_METADATA = {
+    new_year: {
+        title: "Новогодний тамагочи",
+        decor: {left: "❆", center: "Зимняя сказка", right: "❆"},
+        statsBanner: "Тёплая забота согреет даже в самый снежный день",
+        footer: "Кормите, играйте и укладывайте спать – и питомец будет счастлив"
+    },
+    halloween: {
+        title: "Хелуинский тамагочи",
+        decor: {left: "[ ]", center: "Ночь Хелуина", right: "[ ]"},
+        statsBanner: "Следи за настроением своего таинственного питомца",
+        footer: "Кормите, играйте и отдыхайте, чтобы прогнать тьму"
+    },
+    holiday: {
+        title: "Праздничный тамагочи",
+        decor: {left: "* *", center: "Праздничное настроение", right: "* *"},
+        statsBanner: "Пусть праздник продолжается – береги силы и радость питомца",
+        footer: "Игры и угощения делают праздник ярче"
+    }
+};
+
+function
+closeModal()
+{
+    document.getElementById('modal').style.display = 'none';}
+
+function
+openModal(content)
+{
+    document.getElementById('modal-content').innerHTML = content;
+document.getElementById('modal').style.display = 'flex';
+}
+
+function
+showDangerModal(message)
+{
+    const
+content = `
+          < div
+
+
+class ="danger-message" > ${message} < / div >
+
+< br >
+< button
+onclick = "closeModal()" > Понятно < / button >
+`;
+openModal(content);
+setTimeout(closeModal, 3000);
+}
+
+function
+applyInterfaceMetadata()
+{
+const
+meta = INTERFACE_METADATA[interfaceStyle];
+document.title = meta.title;
+if (document.getElementById('main-title')) {
+document.getElementById('main-title').textContent = meta.title;
+}
+document.querySelector('.decor-left').textContent = meta.decor.left;
+document.querySelector('.decor-center').textContent = meta.decor.center;
+document.querySelector('.decor-right').textContent = meta.decor.right;
+if (document.querySelector('.stats-banner')) {
+document.querySelector('.stats-banner').textContent = meta.statsBanner;
+}
+if (document.querySelector('.footer')) {
+document.querySelector('.footer').textContent = meta.footer;
+}
+const
+bgMap = {
     new_year: 'linear-gradient(to bottom, #04101f, #0d2438)',
     halloween: 'linear-gradient(to bottom, #120818, #241020)',
     holiday: 'linear-gradient(to bottom, #021b21, #062b35)'
-  };
-  document.body.style.background = bgMap[interfaceStyle];
-}
-
-function refreshPetTypes() {
-  const select = document.getElementById('pet-type');
-  select.innerHTML = '';
-  const allTypes = [...BASE_PET_TYPES];
-  ADDON_PET_TYPES.forEach(type => {
-    if (enabledAddonTypes.has(type)) allTypes.push(type);
-  });
-  if (secretUnlocked) {
-    allTypes.push(SECRET_PET);
-  }
-  allTypes.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type;
-    option.textContent = type;
-    select.appendChild(option);
-  });
-}
-
-function updateUI() {
-  if (!pet) {
-    document.getElementById('pet-info').textContent = "Питомец ещё не создан.";
-    document.getElementById('hunger').textContent = "Сытость: -";
-    document.getElementById('happiness').textContent = "Счастье: -";
-    document.getElementById('energy').textContent = "Энергия: -";
-  } else {
-    const status = pet.alive ? "живой" : "мертв";
-    document.getElementById('pet-info').textContent = `${pet.petType} по имени ${pet.name} — ${status}.`;
-    document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)' : ''}`;
-    document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}`;
-    document.getElementById('energy').textContent = `Энергия: ${pet.energy}`;
-
-    const buttonsEnabled = pet.alive;
-    document.getElementById('btn-feed').disabled = !buttonsEnabled;
-    document.getElementById('btn-play').disabled = !buttonsEnabled;
-    document.getElementById('btn-sleep').disabled = !buttonsEnabled;
-  }
-
-  // Обновляем монеты в магазине
-  document.getElementById('gold').textContent = gold;
-}
-
-function onFeed() { if (pet) { pet.feed(); updateUI(); } }
-function onPlay() { if (pet) { pet.play(); updateUI(); } }
-function onSleep() { if (pet) { pet.sleep(); updateUI(); } }
-
-function buyPotion(type) {
-  let cost = 0;
-  let success = false;
-
-  if (type === 'revive' && pet && !pet.alive) {
-    cost = 50;
-    if (gold >= cost) {
-      gold -= cost;
-      pet.revive();
-      success = true;
-    }
-  } else if (type === 'satiety' && pet && pet.alive) {
-    cost = 30;
-    if (gold >= cost) {
-      gold -= cost;
-      satietyPotionActive = true;
-      success = true;
-      if (satietyPotionTimer) clearTimeout(satietyPotionTimer);
-      satietyPotionTimer = setTimeout(() => {
-        satietyPotionActive = false;
-        satietyPotionTimer = null;
-        updateUI();
-      }, 5 * 60 * 1000);
-    }
-  } else if (type === 'strength' && pet) {
-    cost = 40;
-    if (gold >= cost) {
-      gold -= cost;
-      pet.boostAll();
-      success = true;
-    }
-  }
-
-  if (success) {
-    updateUI();
-    const message = `<div class="success-message">✅ Куплено!</div>`;
-    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
-    setTimeout(() => {
-      const msg = document.querySelector('.success-message');
-      if (msg) msg.remove();
-    }, 2000);
-  } else {
-    alert("Недостаточно монет или действие невозможно!");
-  }
-}
-
-function createPet() {
-  const name = document.getElementById('pet-name').value.trim() || "Питомец";
-  const type = document.getElementById('pet-type').value;
-  pet = new Pet(name, type);
-  satietyPotionActive = false;
-  if (satietyPotionTimer) {
-    clearTimeout(satietyPotionTimer);
-    satietyPotionTimer = null;
-  }
-  updateUI();
-  showScreen('game-screen');
-
-  clearInterval(tickInterval);
-  tickInterval = setInterval(() => {
-    if (pet) { pet.tick(); updateUI(); }
-  }, 3000);
-
-  clearInterval(goldInterval);
-  goldInterval = setInterval(() => {
-    gold += 1;
-    updateUI(); // обновляем UI везде, где нужно
-  }, 5000);
-}
-
-function showCreateScreen() {
-  refreshPetTypes();
-  showScreen('create-screen');
-}
-
-function openSettings() {
-  const currentTheme = theme;
-  const content = `
-    <h3>Настройки</h3>
-    <p>Тема игры:</p>
-    <label>
-      <input type="radio" name="theme" value="dark" ${currentTheme === 'dark' ? 'checked' : ''}>
-      Тёмная
-    </label>
-    <label>
-      <input type="radio" name="theme" value="light" ${currentTheme === 'light' ? 'checked' : ''}>
-      Светлая
-    </label>
-    <br><br>
-    <button onclick="saveSettings()">Сохранить</button>
-  `;
-  openModal(content);
-}
-
-function saveSettings() {
-  const radios = document.getElementsByName('theme');
-  for (let radio of radios) if (radio.checked) theme = radio.value;
-  closeModal();
-}
-
-function showCredits() {
-  openModal(`
-    <h3>Создатели</h3>
-    <p>Raskrobl(Honexe) - с помощью нейросетей.</p>
-    <button onclick="closeModal()">Закрыть</button>
-  `);
-}
-
-function openAddons() {
-  let checkboxes = '';
-  ADDON_PET_TYPES.forEach(type => {
-    const checked = enabledAddonTypes.has(type) ? 'checked' : '';
-    checkboxes += `<label><input type="checkbox" value="${type}" ${checked}> ${type}</label>`;
-  });
-  const content = `
-    <h3>Дополнительные животные:</h3>
-    <div class="checkbox-list">${checkboxes}</div>
-    <br>
-    <button onclick="saveAddons()">Сохранить</button>
-  `;
-  openModal(content);
-}
-
-function saveAddons() {
-  enabledAddonTypes.clear();
-  document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
-    .forEach(cb => enabledAddonTypes.add(cb.value));
-  closeModal();
-}
-
-function openInterfaceSettings() {
-  const current = interfaceStyle;
-  const content = `
-    <h3>Выберите вариант интерфейса:</h3>
-    <label>
-      <input type="radio" name="iface" value="new_year" ${current === 'new_year' ? 'checked' : ''}>
-      Новогодний интерфейс (базовый)
-    </label>
-    <label>
-      <input type="radio" name="iface" value="halloween" ${current === 'halloween' ? 'checked' : ''}>
-      Хелуинский интерфейс
-    </label>
-    <label>
-      <input type="radio" name="iface" value="holiday" ${current === 'holiday' ? 'checked' : ''}>
-      Праздничный интерфейс
-    </label>
-    <br><br>
-    <button onclick="saveInterface()">Сохранить</button>
-  `;
-  openModal(content);
-}
-
-function saveInterface() {
-  const radios = document.getElementsByName('iface');
-  for (let radio of radios) if (radio.checked) interfaceStyle = radio.value;
-  applyInterfaceMetadata();
-  closeModal();
-}
-
-function openSecretMenu() {
-  const content = `
-    <h3>Подарки</h3>
-    <p>Введите секретный код, чтобы разблокировать особое животное:</p>
-    <input type="password" id="secret-code" placeholder="•••••" maxlength="5" />
-    <br><br>
-    <button onclick="submitSecretCode()">Применить</button>
-    <button onclick="closeModal()">Отмена</button>
-  `;
-  openModal(content);
-}
-
-function submitSecretCode() {
-  const code = document.getElementById('secret-code').value.trim();
-  if (code === "1x1x1") {
-    secretUnlocked = true;
-    const message = `<div class="success-message">✅ Секретное животное «${SECRET_PET}» добавлено!</div>`;
-    document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
-    refreshPetTypes();
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  applyInterfaceMetadata();
-  refreshPetTypes();
-});
-
-document.getElementById('modal').onclick = function(e) {
-  if (e.target === this) closeModal();
 };
-</script>
+document.body.style.background = bgMap[interfaceStyle];
+}
 
-</body>
-</html>
+function
+refreshPetTypes()
+{
+const
+select = document.getElementById('pet-type');
+if (!select) return;
+
+select.innerHTML = '';
+const
+allTypes = [...BASE_PET_TYPES];
+ADDON_PET_TYPES.forEach(type= > {
+if (enabledAddonTypes.has(type))
+allTypes.push(type);
+});
+if (secretUnlocked) {allTypes.push(SECRET_PET);
+}
+if (megaSecretUnlocked) {
+allTypes.push(MEGA_SECRET_PET);
+}
+allTypes.forEach(type= > {
+    const
+option = document.createElement('option');
+option.value = type;
+option.textContent = type;
+select.appendChild(option);
+});
+}
+
+function
+updateUI()
+{
+if (!pet) {
+document.getElementById('pet-info').textContent = "Питомец ещё не создан.";
+document.getElementById('hunger').textContent = "Сытость: -";
+document.getElementById('happiness').textContent = "Счастье: -";
+document.getElementById('energy').textContent = "Энергия: -";
+document.getElementById('rage').style.display = 'none';
+document.getElementById('warning-banner').style.display = 'none';
+} else {
+const status = pet.alive ? "живой": "мертв";
+document.getElementById('pet-info').textContent = `${pet.petType}
+по
+имени ${pet.name} — ${status}.
+`;
+document.getElementById('hunger').textContent = `Сытость: ${pet.hunger}${satietyPotionActive ? ' (✨)': ''}`;
+document.getElementById('happiness').textContent = `Счастье: ${pet.happiness}
+`;
+document.getElementById('energy').textContent = `Энергия: ${pet.energy}
+`;
+
+if (pet.isWildBeast)
+{
+    document.getElementById('rage').style.display = 'block';
+document.getElementById('rage').textContent = `Ярость: ${pet.rage} /${pet.maxRage}
+`;
+
+const
+ragePercent = (pet.rage / pet.maxRage) * 100;
+if (ragePercent > 70)
+{
+    document.getElementById('rage').style.color = '#d32f2f';
+} else if (ragePercent > 40) {
+document.getElementById('rage').style.color = '#ff9800';
+} else {
+document.getElementById('rage').style.color = '#4caf50';
+}
+
+if (ragePercent > 80 & & !pet.rageCountdownActive) {
+document.getElementById('warning-banner').textContent = `⚠️ ${pet.petType} становится опасным!`;
+document.getElementById('warning-banner').style.display = 'block';
+} else if (!pet.rageCountdownActive) {
+document.getElementById('warning-banner').style.display = 'none';
+}
+} else {
+document.getElementById('rage').style.display = 'none';
+document.getElementById('warning-banner').style.display = 'none';}
+
+const buttonsEnabled = pet.alive & & !gameEnded;
+document.getElementById('btn-feed').disabled = !buttonsEnabled;
+document.getElementById('btn-play').disabled = !buttonsEnabled;
+document.getElementById('btn-sleep').disabled = !buttonsEnabled;
+
+const calmBtn = document.getElementById('btn-calm');
+if (calmBtn) {
+if (pet.isWildBeast & & pet.alive & & !gameEnded) {
+calmBtn.classList.remove('grayed');
+calmBtn.disabled = false;
+} else {
+calmBtn.classList.add('grayed');
+calmBtn.disabled = true;
+}
+}
+}
+
+document.getElementById('gold').textContent = gold;
+
+if (currentUser & & document.getElementById('menu-user-info')) {
+const displayName = currentUser.displayName | | currentUser.email.split('@')[0];
+document.getElementById('menu-user-info').textContent = `👤 ${displayName} | Монеты: $
+    {gold} 🪙`;
+}
+}
+
+function
+onFeed()
+{ if (pet)
+{pet.feed();
+updateUI();
+saveGameProgress();}}
+function
+onPlay()
+{ if (pet)
+{pet.play();
+updateUI();
+saveGameProgress();}}
+function
+onSleep()
+{ if (pet)
+{pet.sleep();
+updateUI();
+saveGameProgress();}}
+
+function
+buyPotion(type)
+{
+let
+cost = 0;
+let
+success = false;
+
+if (type === 'revive' & & pet & & !pet.alive) {
+cost = 50;
+if (gold >= cost) {
+gold -= cost;
+pet.revive();
+success = true;
+}
+} else if (type == = 'satiety' & & pet & & pet.alive & & !gameEnded) {
+cost = 30;
+if (gold >= cost) {
+gold -= cost;
+satietyPotionActive = true;
+success = true;
+if (satietyPotionTimer) clearTimeout(satietyPotionTimer);
+satietyPotionTimer = setTimeout(() = > {satietyPotionActive = false;
+satietyPotionTimer = null;
+updateUI();
+}, 5 * 60 * 1000);
+}
+} else if (type == = 'strength' & & pet & & !gameEnded) {
+cost = 40;
+if (gold >= cost) {
+gold -= cost;
+pet.boostAll();
+success = true;
+}
+} else if (type == = 'calm' & & pet & & pet.isWildBeast & & pet.alive & & !gameEnded) {
+cost = 20;
+if (gold >= cost) {
+gold -= cost;
+pet.calmDown(50);
+success = true;
+}
+}
+
+if (success) {
+updateUI();
+saveGameProgress();
+const message = ` < div
+
+
+class ="success-message" > ✅ Куплено! < / div > `;
+
+
+document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+setTimeout(() = > {
+    const
+msg = document.querySelector('.success-message');
+if (msg)
+msg.remove();
+}, 2000);
+} else {
+if (type === 'calm' & & pet & & !pet.isWildBeast) {
+alert("Зелье спокойствия работает только на Диких Зверях!");
+} else {
+alert("Недостаточно монет или действие невозможно!");
+}
+}
+}
+
+function
+createPet()
+{
+    const
+name = document.getElementById('pet-name').value.trim() | | "Питомец";
+const
+type = document.getElementById('pet-type').value;
+pet = new
+Pet(name, type);
+gameEnded = false;
+satietyPotionActive = false;
+if (satietyPotionTimer)
+{
+clearTimeout(satietyPotionTimer);
+satietyPotionTimer = null;
+}
+updateUI();
+showScreen('game-screen');
+
+clearInterval(tickInterval);
+tickInterval = setInterval(() = > {
+if (pet)
+{pet.tick();
+updateUI();
+saveGameProgress();}
+}, 3000);
+
+clearInterval(goldInterval);
+goldInterval = setInterval(() = > {
+    gold += 1;
+updateUI();
+saveGameProgress();
+}, 5000);
+}
+
+function
+showCreateScreen()
+{
+    refreshPetTypes();
+showScreen('create-screen');
+if (currentUser)
+{
+const
+displayName = currentUser.displayName | | currentUser.email.split('@')[0];
+document.getElementById('create-user-info').textContent = `👤 ${displayName}
+`;
+}
+}
+
+function
+openSettings()
+{
+    const
+currentTheme = theme;
+const
+content = `
+          < h3 > Настройки < / h3 >
+                               < p > Тема
+игры: < / p >
+          < label >
+          < input
+type = "radio"
+name = "theme"
+value = "dark" ${currentTheme == = 'dark' ? 'checked': ''} >
+Тёмная
+< / label >
+    < label >
+    < input
+type = "radio"
+name = "theme"
+value = "light" ${currentTheme == = 'light' ? 'checked': ''} >
+Светлая
+< / label >
+    < br > < br >
+    < button
+onclick = "saveSettings()" > Сохранить < / button >
+                                           `;
+openModal(content);
+}
+
+function
+saveSettings()
+{
+    const
+radios = document.getElementsByName('theme');
+for (let radio of radios) if (radio.checked)
+theme = radio.value;
+closeModal();
+}
+
+function
+showCredits()
+{openModal(`
+< h3 > Создатели < / h3 >
+< p > Raskrobl(Honexe) - с
+помощью
+нейросетей. < / p >
+< button
+onclick = "closeModal()" > Закрыть < / button >
+`);
+}
+
+function
+openAddons()
+{
+    let
+checkboxes = '';
+ADDON_PET_TYPES.forEach(type= > {
+    const
+checked = enabledAddonTypes.has(type) ? 'checked': '';
+checkboxes += ` < label > < input
+type = "checkbox"
+value = "${type}" ${checked} > ${type} < / label > `;
+});
+const
+content = `
+          < h3 > Дополнительные
+животные: < / h3 >
+              < div
+
+
+class ="checkbox-list" > ${checkboxes} < / div >
+
+< br >
+< button
+onclick = "saveAddons()" > Сохранить < / button >
+`;
+openModal(content);
+}
+
+function
+saveAddons()
+{
+enabledAddonTypes.clear();
+document.querySelectorAll('#modal-content input[type="checkbox"]:checked')
+.forEach(cb= > enabledAddonTypes.add(cb.value));
+closeModal();
+refreshPetTypes();
+}
+
+function
+openInterfaceSettings()
+{
+const
+current = interfaceStyle;
+const
+content = `
+< h3 > Выберите
+вариант
+интерфейса: < / h3 >
+< label >
+< input
+type = "radio"
+name = "iface"
+value = "new_year" ${current == = 'new_year' ? 'checked': ''} >
+Новогодний
+интерфейс(базовый)
+< / label >
+< label >
+< input
+type = "radio"
+name = "iface"
+value = "halloween" ${current == = 'halloween' ? 'checked': ''} >
+Хелуинский
+интерфейс
+< / label >
+< label >
+< input
+type = "radio"
+name = "iface"
+value = "holiday" ${current == = 'holiday' ? 'checked': ''} >
+Праздничный
+интерфейс
+< / label >
+< br > < br >
+< button
+onclick = "saveInterface()" > Сохранить < / button >
+`;
+openModal(content);}
+
+function
+saveInterface()
+{
+const
+radios = document.getElementsByName('iface');
+for (let radio of radios) if (radio.checked) interfaceStyle = radio.value;
+applyInterfaceMetadata();
+closeModal();
+}
+
+function
+openSecretMenu()
+{
+const
+content = `
+< h3 > Подарки < / h3 >
+< p > Введите
+секретный
+код, чтобы
+разблокировать
+особое
+животное: < / p >
+< input
+type = "password"
+id = "secret-code"
+placeholder = "•••••"
+maxlength = "20" / >
+< br > < br >
+< button
+onclick = "submitSecretCode()" > Применить < / button >
+< button
+onclick = "closeModal()" > Отмена < / button >
+`;
+openModal(content);
+}
+
+function
+submitSecretCode()
+{
+const
+code = document.getElementById('secret-code').value.trim();
+if (code === "1x1x1") {
+secretUnlocked = true;
+const message = ` < div
+
+
+class ="success-message" > ✅ Секретное животное «${SECRET_PET}» добавлено! < / div > `;
+
+
+document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+refreshPetTypes();
+} else if (code === "Вкаминевшестьутра") {
+megaSecretUnlocked = true;
+const
+message = ` < div
+
+
+class ="success-message" > ✅ MEGASECRET животное «${MEGA_SECRET_PET}» добавлено! < / div > `;
+
+
+document.getElementById('modal-content').insertAdjacentHTML('beforeend', message);
+refreshPetTypes();
+} else {
+alert("Неверный код! Попробуйте ещё раз.");
+}
+}
+
+document.getElementById('modal').onclick = function(e)
+{
+if (e.target === this)
+closeModal();
+};
+
+// Инициализация
+при
+загрузке
+document.addEventListener('DOMContentLoaded', () = > {
+applyInterfaceMetadata();
+refreshPetTypes();
+initializeFirebase();
+});
+< / script >
+    < / body >
+        < / html >
